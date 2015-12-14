@@ -86,7 +86,7 @@ int generate(int *colors, prop_t *possibilities, prop_t pattern) {
     pattern_len = i;
 
     for (i = 0; colors[i]; i++) {
-        if (colors[i] >= jocker && colors[i] < jocker + NB_COLORS && jocker <= colors[i])
+        if (colors[i] >= jocker && colors[i] < '0' + NB_COLORS)
             jocker = colors[i] + 1;
     }
     colors_len = i;
