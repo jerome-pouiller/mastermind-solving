@@ -6,6 +6,7 @@
  *     - Jérôme Pouiller <jezz@sysmic.org>
  */
 #include <stdio.h>
+#include <string.h>
 
 #define NB_PLACES 4
 #define NB_COLORS 7
@@ -21,13 +22,13 @@
 #define G 'G'
 #define JOCK '0'
 
-typedef int prop_t[NB_PLACES];
+typedef int prop_t[NB_PLACES + 2];
 typedef int hint_t[NB_PLACES + 2];
 
 /**
  * Check if a proposition is valid compared to one hint
  */
-int checkone(const int *hint /* [NB_PLACES + 2]*/, const int *prop /* [NB_PLACES] */) {
+int checkone(const hint_t hint, const prop_t prop) {
     int i, j;
     int count;
     int used[NB_PLACES] = { 0 };
@@ -58,7 +59,7 @@ int checkone(const int *hint /* [NB_PLACES + 2]*/, const int *prop /* [NB_PLACES
 /**
  * Check if a proposition is valid compared to multiple hints
  */
-int check(int (*hints)[NB_PLACES + 2], const int *prop) {
+int check(hint_t *hints, const prop_t prop) {
     int i;
     for (i = 0; hints[i][0] != -1; i++) {
         if (checkone(hints[i], prop) == -1)
@@ -67,27 +68,101 @@ int check(int (*hints)[NB_PLACES + 2], const int *prop) {
     return 0;
 }
 
+/*
+ * Generate a list of possibilities.
+ *  - possibilities must be big enough (pow(NB_COLORs, NB_PLACES))
+ *  - colors is set of already used colors (if num of already used colors is == NB_COLORS, no jocker are used)
+ *  - pattern is used internally. It must be filled with zeros
+ * Return number of possibilities generated
+ */
+int generate(int *colors, prop_t *possibilities, prop_t pattern) {
+    int jocker = '0';
+    int pattern_len, colors_len;
+    int total = 0;
+    int i;
 
-int history[][NB_PLACES + 2] = {
+    for (i = 0; pattern[i]; i++)
+        ;
+    pattern_len = i;
+
+    for (i = 0; colors[i]; i++) {
+        if (colors[i] >= jocker && colors[i] < jocker + NB_COLORS && jocker <= colors[i])
+            jocker = colors[i] + 1;
+    }
+    colors_len = i;
+    
+    // Last iteration of for jocker
+    for (i = 0; i < colors_len + 1; i++) {
+        if (i < NB_COLORS) {
+            if (i == colors_len)
+                colors[colors_len] = jocker;
+            pattern[pattern_len] = colors[i];
+            if (pattern_len < NB_PLACES - 1) {
+                total += generate(colors, possibilities + total, pattern);
+            } else {
+                memcpy(possibilities[total], pattern, sizeof(prop_t));
+                total++;
+            }
+            if (i == colors_len)
+                colors[colors_len] = 0;
+        }
+    }
+    pattern[pattern_len] = 0;
+    if (!pattern_len)
+        possibilities[total][0] = 0;
+    return total;
+}
+
+int mark(hint_t *hints, prop_t *possibilities) {
+    int cnt;
+    int total = 0;
+    int i;
+
+    for (i = 0; possibilities[i][0]; i++) {
+        if (possibilities[i][NB_PLACES] != -1)
+            possibilities[i][NB_PLACES] = check(hints, possibilities[i]);
+        if (possibilities[i][NB_PLACES] != 1) {
+            cnt = 1;
+            // TODO: multiply if jockers was used
+            total += cnt;
+        }
+    }
+    return total;
+}
+
+void print_prop(prop_t *possibilities) {
+    int i, j;
+
+    for (i = 0; possibilities[i][0]; i++) {
+        printf("  ");
+        for (j = 0; j < NB_PLACES; j++)
+            printf("%c", possibilities[i][j]);
+        printf("\n");
+    }
+}
+
+hint_t history[] = {
     { F, B, C, D, 3, 0 },
     { A, B, C, E, 3, 0 },
-    { -1 },
-    { -1 },
-    { -1 },
-    { -1 },
-    { -1 },
-    { -1 },
-    { -1 },
-    { -1 },
-    { -1 },
-    { -1 }
+    { 0 },
+    { 0 },
+    { 0 },
+    { 0 },
+    { 0 },
+    { 0 },
+    { 0 },
+    { 0 },
+    { 0 },
+    { 0 }
 };
 
 int main(int argc, char **argv) {
-    int prop[NB_PLACES] = { A, B, C, D };
-int ret;
-    ret = check(history, prop);
-    printf("%d\n", ret);
+    prop_t poss[3000];
+    int colors[NB_COLORS] = { A, B, 0 };
+    prop_t tmp = { };
+    int num = generate(colors, poss, tmp);
+    printf("%d\n", num);
+    print_prop(poss);
 
     return 0;
 }
