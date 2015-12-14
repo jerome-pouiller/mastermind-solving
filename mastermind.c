@@ -113,17 +113,27 @@ int generate(int *colors, prop_t *possibilities, prop_t pattern) {
     return total;
 }
 
-int mark(hint_t *hints, prop_t *possibilities) {
-    int cnt;
+int mark(hint_t *hints, prop_t *possibilities, int *colors) {
     int total = 0;
     int i;
+    int nb_unknown;
 
+    for (i = 0; colors[i]; i++)
+        ;
+    nb_unknown = NB_COLORS - i;
     for (i = 0; possibilities[i][0]; i++) {
         if (possibilities[i][NB_PLACES] != -1)
             possibilities[i][NB_PLACES] = check(hints, possibilities[i]);
-        if (possibilities[i][NB_PLACES] != 1) {
-            cnt = 1;
-            // TODO: multiply if jockers was used
+        if (possibilities[i][NB_PLACES] != -1) {
+            char jocker = '0';
+            int cnt = 1;
+            int j;
+            for (j = 0; j < NB_PLACES; j++) {
+                if (possibilities[i][j] >= jocker && possibilities[i][j] < '0' + NB_COLORS) {
+                    cnt *= nb_unknown - (jocker - '0');
+                    jocker = possibilities[i][j] + 1;
+                }
+            }
             total += cnt;
         }
     }
@@ -137,13 +147,16 @@ void print_prop(prop_t *possibilities) {
         printf("  ");
         for (j = 0; j < NB_PLACES; j++)
             printf("%c", possibilities[i][j]);
+        printf("->");
+        for (; j < NB_PLACES + 2; j++)
+            printf("%d", possibilities[i][j]);
         printf("\n");
     }
 }
 
 hint_t history[] = {
-    { F, B, C, D, 3, 0 },
-    { A, B, C, E, 3, 0 },
+    // { B, B, B, B, 0, 0 },
+    { A, A, A, A, 0, 0 },
     { 0 },
     { 0 },
     { 0 },
@@ -158,11 +171,13 @@ hint_t history[] = {
 
 int main(int argc, char **argv) {
     prop_t poss[3000];
-    int colors[NB_COLORS] = { A, B, 0 };
+    int colors[NB_COLORS] = { A, 0 };
     prop_t tmp = { };
     int num = generate(colors, poss, tmp);
     printf("%d\n", num);
+    num = mark(history, poss, colors);
     print_prop(poss);
+    printf("%d possibilities\n", num);
 
     return 0;
 }
