@@ -61,7 +61,7 @@ int checkone(const hint_t hint, const prop_t prop) {
  */
 int check(hint_t *hints, const prop_t prop) {
     int i;
-    for (i = 0; hints[i][0] != -1; i++) {
+    for (i = 0; hints[i][0]; i++) {
         if (checkone(hints[i], prop) == -1)
             return -1;
     }
