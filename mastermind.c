@@ -21,6 +21,7 @@
 #define F 'F'
 #define G 'G'
 #define JOCK '0'
+#define DEBUG 1
 
 typedef int prop_t[NB_PLACES + 2];
 typedef int hint_t[NB_PLACES + 2];
@@ -113,6 +114,11 @@ int generate(int *colors, prop_t *possibilities, prop_t pattern) {
     return total;
 }
 
+/**
+ * Using hints, mark possibilities valid or not. Return number of possibilities
+ * taking into account jockers. colors is only used to compute number of
+ * possibilities.
+ */
 int mark(hint_t *hints, prop_t *possibilities, int *colors) {
     int total = 0;
     int i;
@@ -124,7 +130,7 @@ int mark(hint_t *hints, prop_t *possibilities, int *colors) {
     for (i = 0; possibilities[i][0]; i++) {
         if (possibilities[i][NB_PLACES] != -1)
             possibilities[i][NB_PLACES] = check(hints, possibilities[i]);
-        if (possibilities[i][NB_PLACES] != -1) {
+        if (possibilities[i][NB_PLACES] != -1 || DEBUG == 1) {
             char jocker = '0';
             int cnt = 1;
             int j;
@@ -134,7 +140,10 @@ int mark(hint_t *hints, prop_t *possibilities, int *colors) {
                     jocker = possibilities[i][j] + 1;
                 }
             }
-            total += cnt;
+            possibilities[i][NB_PLACES + 1] = cnt;
+            if (possibilities[i][NB_PLACES] != -1) {
+                total += cnt;
+            }
         }
     }
     return total;
@@ -147,10 +156,7 @@ void print_prop(prop_t *possibilities) {
         printf("  ");
         for (j = 0; j < NB_PLACES; j++)
             printf("%c", possibilities[i][j]);
-        printf("->");
-        for (; j < NB_PLACES + 2; j++)
-            printf("%d", possibilities[i][j]);
-        printf("\n");
+        printf("-> %2d %3d\n", possibilities[i][NB_PLACES], possibilities[i][NB_PLACES + 1]);
     }
 }
 
