@@ -7,6 +7,8 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
+#include <assert.h>
 
 #define NB_PLACES 4
 #define NB_COLORS 7
@@ -149,20 +151,94 @@ int mark(hint_t *hints, prop_t *possibilities, int *colors) {
     return total;
 }
 
-void print_prop(prop_t *possibilities) {
+/**
+ * Apply minmax algorithm
+ */
+int getmax(hint_t *hints, int *colors, int depth);
+int getmin(hint_t *hints, int *colors, int depth, prop_t poss[3000]);
+
+int getmin(hint_t *hints, int *colors, int depth, prop_t poss[3000]) {
+    int num_poss;
+    int i, j, k;
+    prop_t tmp = { };
+    int min = INT_MAX;
+
+    generate(colors, poss, tmp);
+    num_poss = mark(hints, poss, colors);
+    if (num_poss == 0)
+        return 0;
+    if (!depth || num_poss == 1) {
+        for (i = 0; poss[i][0]; i++)
+            if (poss[i][NB_PLACES] != -1)
+                poss[i][NB_PLACES] = num_poss;
+        return num_poss;
+    } else {
+        int nb_hints;
+        for (i = 0; hints[i][0]; i++)
+            ;
+        nb_hints = i;
+        min = INT_MAX;
+        for (i = 0; poss[i][0]; i++) {
+            if (poss[i][NB_PLACES] != -1) {
+                int colors_local[NB_COLORS + 1];
+                memcpy(hints[nb_hints], poss[i], sizeof(hints[nb_hints]));
+                memcpy(colors_local, colors, sizeof(colors_local));
+                for (j = 0; poss[i][j]; j++) {
+                    for (k = 0; colors_local[k] && poss[i][j] != colors_local[k]; k++)
+                        ;
+                    if (!colors_local[k])
+                        colors_local[k] = poss[i][j];
+                }
+                poss[i][NB_PLACES] = getmax(hints, colors_local, depth);
+                assert(poss[i][NB_PLACES] > 0);
+                if (poss[i][NB_PLACES] < min)
+                    min = poss[i][NB_PLACES];
+            }
+        }
+        hints[nb_hints][0] = 0;
+        return min;
+    }
+}
+
+// TODO: support depth == 0 and return result in order to implement "master" mode
+int getmax(hint_t *hints, int *colors, int depth) {
+    int max = 0;
+    int nb_hints;
+    int i;
+    int tmp;
+
+    assert(depth > 0);
+    for (i = 0; hints[i][0]; i++)
+        ;
+    nb_hints = i - 1;
+    
+    for (hints[nb_hints][IDX_PLACE_OK] = 0; hints[nb_hints][IDX_PLACE_OK] <= NB_PLACES; hints[nb_hints][IDX_PLACE_OK]++) {
+        for (hints[nb_hints][IDX_COLOR_OK] = 0; hints[nb_hints][IDX_PLACE_OK] + hints[nb_hints][IDX_COLOR_OK] <= NB_PLACES; hints[nb_hints][IDX_COLOR_OK]++) {
+                prop_t poss_local[3000];
+                tmp = getmin(hints, colors, depth - 1, poss_local);
+                if (tmp > max)
+                    max = tmp;
+        }
+    }
+    return max;
+}
+
+void print_prop(prop_t *possibilities, int score) {
     int i, j;
 
     for (i = 0; possibilities[i][0]; i++) {
-        printf("  ");
-        for (j = 0; j < NB_PLACES; j++)
-            printf("%c", possibilities[i][j]);
-        printf("-> %2d %3d\n", possibilities[i][NB_PLACES], possibilities[i][NB_PLACES + 1]);
+        if (score == -1 || possibilities[i][NB_PLACES] == score) {
+            printf("  ");
+            for (j = 0; j < NB_PLACES; j++)
+                printf("%c", possibilities[i][j]);
+            printf("-> %2d %3d\n", possibilities[i][NB_PLACES], possibilities[i][NB_PLACES + 1]);
+        }
     }
 }
 
 hint_t history[] = {
-    // { B, B, B, B, 0, 0 },
-    { A, A, A, A, 0, 0 },
+    //{ B, B, B, B, 1, 0 },
+    //{ A, A, A, A, 2, 0 },
     { 0 },
     { 0 },
     { 0 },
@@ -176,15 +252,19 @@ hint_t history[] = {
 };
 
 int main(int argc, char **argv) {
+    int colors[NB_COLORS + 1] = { A, B, C, D, E, F, G, 0 };
     prop_t poss[3000];
-    int colors[NB_COLORS] = { A, 0 };
     prop_t tmp = { };
     int num = generate(colors, poss, tmp);
+    int ret;
     printf("%d\n", num);
     num = mark(history, poss, colors);
-    print_prop(poss);
+    // print_prop(poss, -1);
     printf("%d possibilities\n", num);
 
+    ret = getmin(history, colors, 1, poss);
+    print_prop(poss, ret);
+    printf("Best score : %d\n", ret);
     return 0;
 }
 
