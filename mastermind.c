@@ -125,23 +125,28 @@ int mark(hint_t *hints, prop_t *possibilities, int *colors) {
     int total = 0;
     int i;
     int nb_unknown;
+    char jocker = '0' - 1;
 
     for (i = 0; colors[i]; i++)
-        ;
+        if (colors[i] > jocker && colors[i] < '0' + NB_COLORS)
+            jocker = colors[i];
     nb_unknown = NB_COLORS - i;
     for (i = 0; possibilities[i][0]; i++) {
         if (possibilities[i][NB_PLACES] != -1)
             possibilities[i][NB_PLACES] = check(hints, possibilities[i]);
         if (possibilities[i][NB_PLACES] != -1 || DEBUG == 1) {
-            char jocker = '0';
+            char jocker2 = jocker;
+            int nb_unknown2 = nb_unknown;
             int cnt = 1;
             int j;
             for (j = 0; j < NB_PLACES; j++) {
-                if (possibilities[i][j] >= jocker && possibilities[i][j] < '0' + NB_COLORS) {
-                    cnt *= nb_unknown - (jocker - '0');
-                    jocker = possibilities[i][j] + 1;
+                if (possibilities[i][j] > jocker2 && possibilities[i][j] < '0' + NB_COLORS) {
+                    jocker2 = possibilities[i][j];
+                    cnt *= nb_unknown2;
+                    nb_unknown2--;
                 }
             }
+            assert(cnt > 0);
             possibilities[i][NB_PLACES + 1] = cnt;
             if (possibilities[i][NB_PLACES] != -1) {
                 total += cnt;
