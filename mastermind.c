@@ -28,6 +28,26 @@
 typedef int prop_t[NB_PLACES + 2];
 typedef int hint_t[NB_PLACES + 2];
 
+void print_prop(prop_t poss) {
+    int j;
+    printf("  ");
+    for (j = 0; j < NB_PLACES; j++)
+        printf("%c", poss[j]);
+    printf("-> %2d %3d\n", poss[NB_PLACES], poss[NB_PLACES + 1]);
+}
+
+int print_props(prop_t *possibilities, int score) {
+    int i, j;
+    int num = 0;
+    for (i = 0; possibilities[i][0]; i++) {
+        if (score == -1 || possibilities[i][NB_PLACES] == score) {
+            num++;
+            print_prop(possibilities[i]);
+        }
+    }
+    return num;
+}
+
 /**
  * Check if a proposition is valid compared to one hint
  */
@@ -228,19 +248,6 @@ int getmax(hint_t *hints, int *colors, int depth) {
     return max;
 }
 
-void print_prop(prop_t *possibilities, int score) {
-    int i, j;
-
-    for (i = 0; possibilities[i][0]; i++) {
-        if (score == -1 || possibilities[i][NB_PLACES] == score) {
-            printf("  ");
-            for (j = 0; j < NB_PLACES; j++)
-                printf("%c", possibilities[i][j]);
-            printf("-> %2d %3d\n", possibilities[i][NB_PLACES], possibilities[i][NB_PLACES + 1]);
-        }
-    }
-}
-
 hint_t history[] = {
     //{ B, B, B, B, 1, 0 },
     //{ A, A, A, A, 2, 0 },
@@ -264,12 +271,13 @@ int main(int argc, char **argv) {
     int ret;
     printf("%d\n", num);
     num = mark(history, poss, colors);
-    // print_prop(poss, -1);
+    print_props(poss, -1);
     printf("%d possibilities\n", num);
 
     ret = getmin(history, colors, 1, poss);
-    print_prop(poss, ret);
     printf("Best score : %d\n", ret);
+    ret = print_props(poss, ret);
+    printf("Num best scores : %d\n", ret);
     return 0;
 }
 
