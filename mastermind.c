@@ -11,7 +11,7 @@
 #include <assert.h>
 
 #define NB_PLACES 4
-#define NB_COLORS 7
+#define NB_COLORS 6
 #define IDX_PLACE_OK NB_PLACES
 #define IDX_COLOR_OK (NB_PLACES + 1)
 
