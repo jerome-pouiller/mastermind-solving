@@ -25,6 +25,8 @@ typedef int prop_t[NB_PLACES + NB_EXTRA_PLACES];
 typedef int hint_t[NB_PLACES + NB_EXTRA_PLACES];
 typedef int colorlist_t[NB_COLORS + 1];
 
+#define COLOR0 'A'
+#define JOCKER0 '0'
 #define A 'A'
 #define B 'B'
 #define C 'C'
@@ -32,7 +34,7 @@ typedef int colorlist_t[NB_COLORS + 1];
 #define E 'E'
 #define F 'F'
 #define G 'G'
-#define JOCK '0'
+
 #define DEBUG 1
 
 struct debug_parm {
@@ -66,7 +68,7 @@ void pr_prop(const prop_t prop) {
     for (j = 0; j < NB_PLACES; j++)
         printf("%c", prop[j]);
     printf("->");
-    for (; j < NB_PLACES + NB_EXTRA_PLACES; j++)
+    for (j = NB_PLACES; j < NB_PLACES + NB_EXTRA_PLACES; j++)
         printf(" %3d", prop[j]);
     printf("\n");
 }
@@ -140,7 +142,7 @@ int check(hint_t *hints, const prop_t prop) {
  * Return number of possibilities generated
  */
 int _generate_player(colorlist_t colors, prop_t *results, prop_t pattern) {
-    int jocker = '0';
+    int jocker = JOCKER0;
     int pattern_len, colors_len;
     int total = 0;
     int i;
@@ -150,7 +152,7 @@ int _generate_player(colorlist_t colors, prop_t *results, prop_t pattern) {
     pattern_len = i;
 
     for (i = 0; colors[i]; i++) {
-        if (colors[i] >= jocker && colors[i] < '0' + NB_COLORS)
+        if (colors[i] >= jocker && colors[i] < JOCKER0 + NB_COLORS)
             jocker = colors[i] + 1;
     }
     colors_len = i;
@@ -209,10 +211,10 @@ int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
     int total = 0;
     int i;
     int nb_unknown;
-    char jocker = '0' - 1;
+    char jocker = JOCKER0 - 1;
 
     for (i = 0; colors[i]; i++)
-        if (colors[i] > jocker && colors[i] < '0' + NB_COLORS)
+        if (colors[i] > jocker && colors[i] < JOCKER0 + NB_COLORS)
             jocker = colors[i];
     nb_unknown = NB_COLORS - i;
     for (i = 0; possibilities[i][0]; i++) {
@@ -224,7 +226,7 @@ int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
             int cnt = 1;
             int j;
             for (j = 0; j < NB_PLACES; j++) {
-                if (possibilities[i][j] > jocker2 && possibilities[i][j] < '0' + NB_COLORS) {
+                if (possibilities[i][j] > jocker2 && possibilities[i][j] < JOCKER0 + NB_COLORS) {
                     jocker2 = possibilities[i][j];
                     cnt *= nb_unknown2;
                     nb_unknown2--;
