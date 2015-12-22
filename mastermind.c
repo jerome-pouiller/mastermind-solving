@@ -50,7 +50,7 @@ void print_prop(prop_t poss) {
 }
 
 int print_props(prop_t *possibilities, int score) {
-    int i, j;
+    int i;
     int num = 0;
     for (i = 0; possibilities[i][0]; i++) {
         if (score == -1 || possibilities[i][NB_PLACES] == score) {
