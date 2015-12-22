@@ -35,10 +35,16 @@ typedef int colorlist_t[NB_COLORS + 1];
 #define JOCK '0'
 #define DEBUG 1
 
+struct debug_parm {
+     int initial_depth;
+     int debug_depth;
+     int details;
+};
+
 void pr_prop(const prop_t prop);
 int pr_proplist(prop_t props[], int score);
-int getmax(hint_t *hints, colorlist_t colors, int depth, int debug_depth);
-int getmin(hint_t *hints, colorlist_t colors, int depth, int debug_depth, prop_t poss[NB_POSS_PLAYER]);
+int getmax(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm);
+int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, prop_t poss[NB_POSS_PLAYER]);
 
 /* Pretty print a propostion. */
 void pr_prop(const prop_t prop) {
@@ -121,7 +127,7 @@ int check(hint_t *hints, const prop_t prop) {
  *  - pattern is used internally. It must be filled with zeros
  * Return number of possibilities generated
  */
-int _generate_player(colorlist_t colors, prop_t *possibilities, prop_t pattern) {
+int _generate_player(colorlist_t colors, prop_t *results, prop_t pattern) {
     int jocker = '0';
     int pattern_len, colors_len;
     int total = 0;
@@ -136,17 +142,16 @@ int _generate_player(colorlist_t colors, prop_t *possibilities, prop_t pattern) 
             jocker = colors[i] + 1;
     }
     colors_len = i;
-    
-    // Last iteration of for jocker
+
     for (i = 0; i < colors_len + 1; i++) {
         if (i < NB_COLORS) {
             if (i == colors_len)
                 colors[colors_len] = jocker;
             pattern[pattern_len] = colors[i];
             if (pattern_len < NB_PLACES - 1) {
-                total += _generate_player(colors, possibilities + total, pattern);
+                total += _generate_player(colors, results + total, pattern);
             } else {
-                memcpy(possibilities[total], pattern, sizeof(prop_t));
+                memcpy(results[total], pattern, sizeof(prop_t));
                 total++;
             }
             if (i == colors_len)
@@ -155,13 +160,13 @@ int _generate_player(colorlist_t colors, prop_t *possibilities, prop_t pattern) 
     }
     pattern[pattern_len] = 0;
     if (!pattern_len)
-        possibilities[total][0] = 0;
+        results[total][0] = 0;
     return total;
 }
 
-int generate_player(colorlist_t colors, prop_t *possibilities) {
+int generate_player(colorlist_t colors, prop_t results[NB_POSS_PLAYER]) {
     prop_t pattern = { };
-    return _generate_player(colors, possibilities, pattern);
+    return _generate_player(colors, results, pattern);
 }
 
 /**
@@ -207,10 +212,13 @@ int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
 /**
  * Apply minmax algorithm
  */
-int getmin(hint_t *hints, colorlist_t colors, int depth, int debug_depth, prop_t poss[NB_POSS_PLAYER]) {
+int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, prop_t poss[NB_POSS_PLAYER]) {
     int num_poss;
     int i, j, k;
     int min = INT_MAX;
+
+    if (debug_parm && debug_parm->initial_depth == 0)
+        debug_parm->initial_depth = depth;
 
     generate_player(colors, poss);
     num_poss = mark(hints, poss, colors);
@@ -238,7 +246,7 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, int debug_depth, prop_t
                     if (!colors_local[k])
                         colors_local[k] = poss[i][j];
                 }
-                poss[i][NB_PLACES] = getmax(hints, colors_local, depth, debug_depth);
+                poss[i][NB_PLACES] = getmax(hints, colors_local, depth, debug_parm);
                 assert(poss[i][NB_PLACES] > 0);
                 if (poss[i][NB_PLACES] < min)
                     min = poss[i][NB_PLACES];
@@ -246,40 +254,48 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, int debug_depth, prop_t
         }
         hints[nb_hints][0] = 0;
     }
-    if (debug_depth > 0 && debug_depth <= depth) {
+    if (debug_parm && debug_parm->debug_depth <= depth) {
         printf("%d ", depth);
-        for (i = 0; i < -(debug_depth - depth); i++)
+        for (i = 0; i < debug_parm->initial_depth - depth; i++)
             printf("    ");
-        printf("  Got min=%d\n", min);
+        printf("Got min=%d", min);
+        if (num_poss == 1)
+            printf(" (solved)");
+        if (min == 0)
+            printf(" (no-solutions)");
+        printf("\n");
     }
     return min;
 }
 
 // TODO: support depth == 0 and return result in order to implement "master" mode
-int getmax(hint_t *hints, colorlist_t colors, int depth, int debug_depth) {
+int getmax(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm) {
     int max = -1;
     int nb_hints;
     int i;
     int tmp;
 
+    if (debug_parm && debug_parm->initial_depth == 0)
+        debug_parm->initial_depth = depth;
+
     assert(depth > 0);
     for (i = 0; hints[i][0]; i++)
         ;
     nb_hints = i - 1;
-    
+
     for (hints[nb_hints][IDX_PLACE_OK] = 0; hints[nb_hints][IDX_PLACE_OK] <= NB_PLACES; hints[nb_hints][IDX_PLACE_OK]++) {
         for (hints[nb_hints][IDX_COLOR_OK] = 0; hints[nb_hints][IDX_PLACE_OK] + hints[nb_hints][IDX_COLOR_OK] <= NB_PLACES; hints[nb_hints][IDX_COLOR_OK]++) {
-                prop_t poss_local[NB_POSS_PLAYER] = { };
-                tmp = getmin(hints, colors, depth - 1, poss_local);
-                if (tmp > max)
-                    max = tmp;
+            prop_t poss_local[NB_POSS_PLAYER] = { };
+            tmp = getmin(hints, colors, depth - 1, debug_parm, poss_local);
+            if (tmp > max)
+                max = tmp;
         }
     }
-    if (debug_depth > 0 && debug_depth <= depth) {
+    if (debug_parm && debug_parm->debug_depth <= depth) {
         printf("%d ", depth);
-        for (i = 0; i < -(debug_depth - depth); i++)
+        for (i = 0; i < debug_parm->initial_depth - depth; i++)
             printf("    ");
-        printf("Got max=%d\n", max);
+        printf("  Got max=%d\n", max);
     }
     return max;
 }
@@ -301,6 +317,9 @@ hint_t history[] = {
 
 int main(int argc, char **argv) {
     colorlist_t colors = { A, B, C, D, E, F, 0 };
+    struct debug_parm debug_parm = {
+        .debug_depth = 2,
+    };
     prop_t poss[NB_POSS_PLAYER];
     int num = generate_player(colors, poss);
     int ret;
@@ -309,7 +328,7 @@ int main(int argc, char **argv) {
     pr_proplist(poss, -1);
     printf("%d possibilities\n", num);
 
-    ret = getmin(history, colors, 2, 0, poss);
+    ret = getmin(history, colors, 2, &debug_parm, poss);
     printf("Best score : %d\n", ret);
     ret = pr_proplist(poss, ret);
     printf("Num best scores : %d\n", ret);
