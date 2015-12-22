@@ -35,11 +35,13 @@ typedef int colorlist_t[NB_COLORS];
 #define JOCK '0'
 #define DEBUG 1
 
+void pr_prop(const prop_t prop);
+int pr_proplist(prop_t props[], int score);
 int getmax(hint_t *hints, int *colors, int depth);
 int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]);
 
 /* Pretty print a propostion. */
-void pr_prop(prop_t prop) {
+void pr_prop(const prop_t prop) {
     int j;
 
     printf("  ");
