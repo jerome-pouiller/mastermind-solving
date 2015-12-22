@@ -37,8 +37,8 @@ typedef int colorlist_t[NB_COLORS + 1];
 
 void pr_prop(const prop_t prop);
 int pr_proplist(prop_t props[], int score);
-int getmax(hint_t *hints, colorlist_t colors, int depth);
-int getmin(hint_t *hints, colorlist_t colors, int depth, prop_t poss[NB_POSS_PLAYER]);
+int getmax(hint_t *hints, colorlist_t colors, int depth, int debug_depth);
+int getmin(hint_t *hints, colorlist_t colors, int depth, int debug_depth, prop_t poss[NB_POSS_PLAYER]);
 
 /* Pretty print a propostion. */
 void pr_prop(const prop_t prop) {
@@ -207,20 +207,20 @@ int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
 /**
  * Apply minmax algorithm
  */
-int getmin(hint_t *hints, colorlist_t colors, int depth, prop_t poss[NB_POSS_PLAYER]) {
+int getmin(hint_t *hints, colorlist_t colors, int depth, int debug_depth, prop_t poss[NB_POSS_PLAYER]) {
     int num_poss;
     int i, j, k;
     int min = INT_MAX;
 
     generate_player(colors, poss);
     num_poss = mark(hints, poss, colors);
-    if (num_poss == 0)
-        return 0;
-    if (!depth || num_poss == 1) {
+    if (num_poss == 0) {
+        min = 0;
+    } else if (!depth || num_poss == 1) {
         for (i = 0; poss[i][0]; i++)
             if (poss[i][NB_PLACES] != -1)
                 poss[i][NB_PLACES] = num_poss;
-        return num_poss;
+        min = num_poss;
     } else {
         int nb_hints;
         for (i = 0; hints[i][0]; i++)
@@ -238,19 +238,25 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, prop_t poss[NB_POSS_PLA
                     if (!colors_local[k])
                         colors_local[k] = poss[i][j];
                 }
-                poss[i][NB_PLACES] = getmax(hints, colors_local, depth);
+                poss[i][NB_PLACES] = getmax(hints, colors_local, depth, debug_depth);
                 assert(poss[i][NB_PLACES] > 0);
                 if (poss[i][NB_PLACES] < min)
                     min = poss[i][NB_PLACES];
             }
         }
         hints[nb_hints][0] = 0;
-        return min;
     }
+    if (debug_depth > 0 && debug_depth <= depth) {
+        printf("%d ", depth);
+        for (i = 0; i < -(debug_depth - depth); i++)
+            printf("    ");
+        printf("  Got min=%d\n", min);
+    }
+    return min;
 }
 
 // TODO: support depth == 0 and return result in order to implement "master" mode
-int getmax(hint_t *hints, colorlist_t colors, int depth) {
+int getmax(hint_t *hints, colorlist_t colors, int depth, int debug_depth) {
     int max = -1;
     int nb_hints;
     int i;
@@ -268,6 +274,12 @@ int getmax(hint_t *hints, colorlist_t colors, int depth) {
                 if (tmp > max)
                     max = tmp;
         }
+    }
+    if (debug_depth > 0 && debug_depth <= depth) {
+        printf("%d ", depth);
+        for (i = 0; i < -(debug_depth - depth); i++)
+            printf("    ");
+        printf("Got max=%d\n", max);
     }
     return max;
 }
@@ -297,7 +309,7 @@ int main(int argc, char **argv) {
     pr_proplist(poss, -1);
     printf("%d possibilities\n", num);
 
-    ret = getmin(history, colors, 1, poss);
+    ret = getmin(history, colors, 2, 0, poss);
     printf("Best score : %d\n", ret);
     ret = pr_proplist(poss, ret);
     printf("Num best scores : %d\n", ret);
