@@ -12,11 +12,11 @@
 
 #define NB_COLORS        6
 #define NB_PLACES        4
-#define NB_EXTRA_PLACES  2
-#define IDX_PLACE_OK     NB_PLACES
+#define NB_EXTRA_PLACES  4
+#define IDX_PLACE_OK     (NB_PLACES + 0)
 #define IDX_COLOR_OK     (NB_PLACES + 1)
-#define IDX_NUM_SYM_POSS NB_PLACES
-#define IDX_NUM_POSS     (NB_PLACES + 1)
+#define IDX_NUM_SYM_POSS (NB_PLACES + 2)
+#define IDX_NUM_POSS     (NB_PLACES + 3)
 #define NB_POSS_PLAYER   (6 * 6 * 6 * 6 + 1) // 6 ** 4 + 1
 // Note: if (NB_PLACES - 1) are correctly placed, it is not possible to have 1 wrong placed
 #define NB_POSS_MASTER   (((NB_PLACES + 1) * (NB_PLACES + 2)) / 2 - 1 + 1)
@@ -185,9 +185,9 @@ int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
             jocker = colors[i];
     nb_unknown = NB_COLORS - i;
     for (i = 0; possibilities[i][0]; i++) {
-        if (possibilities[i][NB_PLACES] != -1)
-            possibilities[i][NB_PLACES] = check(hints, possibilities[i]);
-        if (possibilities[i][NB_PLACES] != -1 || DEBUG == 1) {
+        if (possibilities[i][IDX_NUM_POSS] != -1)
+            possibilities[i][IDX_NUM_POSS] = check(hints, possibilities[i]);
+        if (possibilities[i][IDX_NUM_POSS] != -1 || DEBUG == 1) {
             char jocker2 = jocker;
             int nb_unknown2 = nb_unknown;
             int cnt = 1;
@@ -200,8 +200,8 @@ int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
                 }
             }
             assert(cnt > 0);
-            possibilities[i][NB_PLACES + 1] = cnt;
-            if (possibilities[i][NB_PLACES] != -1) {
+            possibilities[i][IDX_NUM_SYM_POSS] = cnt;
+            if (possibilities[i][IDX_NUM_POSS] != -1) {
                 total += cnt;
             }
         }
@@ -226,8 +226,8 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
         min = 0;
     } else if (!depth || num_poss == 1) {
         for (i = 0; poss[i][0]; i++)
-            if (poss[i][NB_PLACES] != -1)
-                poss[i][NB_PLACES] = num_poss;
+            if (poss[i][IDX_NUM_POSS] != -1)
+                poss[i][IDX_NUM_POSS] = num_poss;
         min = num_poss;
     } else {
         int nb_hints;
@@ -236,7 +236,7 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
         nb_hints = i;
         min = INT_MAX;
         for (i = 0; poss[i][0]; i++) {
-            if (poss[i][NB_PLACES] != -1) {
+            if (poss[i][IDX_NUM_POSS] != -1) {
                 int colors_local[NB_COLORS + 1];
                 memcpy(hints[nb_hints], poss[i], sizeof(hints[nb_hints]));
                 memcpy(colors_local, colors, sizeof(colors_local));
@@ -246,10 +246,10 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
                     if (!colors_local[k])
                         colors_local[k] = poss[i][j];
                 }
-                poss[i][NB_PLACES] = getmax(hints, colors_local, depth, debug_parm);
-                assert(poss[i][NB_PLACES] > 0);
-                if (poss[i][NB_PLACES] < min)
-                    min = poss[i][NB_PLACES];
+                poss[i][IDX_NUM_POSS] = getmax(hints, colors_local, depth, debug_parm);
+                assert(poss[i][IDX_NUM_POSS] > 0);
+                if (poss[i][IDX_NUM_POSS] < min)
+                    min = poss[i][IDX_NUM_POSS];
             }
         }
         hints[nb_hints][0] = 0;
