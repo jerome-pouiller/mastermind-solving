@@ -121,7 +121,7 @@ int check(hint_t *hints, const prop_t prop) {
  *  - pattern is used internally. It must be filled with zeros
  * Return number of possibilities generated
  */
-int generate(colorlist_t colors, prop_t *possibilities, prop_t pattern) {
+int _generate_player(colorlist_t colors, prop_t *possibilities, prop_t pattern) {
     int jocker = '0';
     int pattern_len, colors_len;
     int total = 0;
@@ -144,7 +144,7 @@ int generate(colorlist_t colors, prop_t *possibilities, prop_t pattern) {
                 colors[colors_len] = jocker;
             pattern[pattern_len] = colors[i];
             if (pattern_len < NB_PLACES - 1) {
-                total += generate(colors, possibilities + total, pattern);
+                total += _generate_player(colors, possibilities + total, pattern);
             } else {
                 memcpy(possibilities[total], pattern, sizeof(prop_t));
                 total++;
@@ -157,6 +157,11 @@ int generate(colorlist_t colors, prop_t *possibilities, prop_t pattern) {
     if (!pattern_len)
         possibilities[total][0] = 0;
     return total;
+}
+
+int generate_player(colorlist_t colors, prop_t *possibilities) {
+    prop_t pattern = { };
+    return _generate_player(colors, possibilities, pattern);
 }
 
 /**
@@ -205,10 +210,9 @@ int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
 int getmin(hint_t *hints, colorlist_t colors, int depth, prop_t poss[NB_POSS_PLAYER]) {
     int num_poss;
     int i, j, k;
-    prop_t tmp = { };
     int min = INT_MAX;
 
-    generate(colors, poss, tmp);
+    generate_player(colors, poss);
     num_poss = mark(hints, poss, colors);
     if (num_poss == 0)
         return 0;
@@ -286,8 +290,7 @@ hint_t history[] = {
 int main(int argc, char **argv) {
     colorlist_t colors = { A, B, C, D, E, F, 0 };
     prop_t poss[3000];
-    prop_t tmp = { };
-    int num = generate(colors, poss, tmp);
+    int num = generate_player(colors, poss);
     int ret;
     printf("%d\n", num);
     num = mark(history, poss, colors);
