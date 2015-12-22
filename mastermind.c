@@ -289,7 +289,7 @@ hint_t history[] = {
 
 int main(int argc, char **argv) {
     colorlist_t colors = { A, B, C, D, E, F, 0 };
-    prop_t poss[3000];
+    prop_t poss[NB_POSS_PLAYER];
     int num = generate_player(colors, poss);
     int ret;
     printf("%d\n", num);
