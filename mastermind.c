@@ -23,7 +23,7 @@
 
 typedef int prop_t[NB_PLACES + NB_EXTRA_PLACES];
 typedef int hint_t[NB_PLACES + NB_EXTRA_PLACES];
-typedef int colorlist_t[NB_COLORS];
+typedef int colorlist_t[NB_COLORS + 1];
 
 #define A 'A'
 #define B 'B'
@@ -37,8 +37,8 @@ typedef int colorlist_t[NB_COLORS];
 
 void pr_prop(const prop_t prop);
 int pr_proplist(prop_t props[], int score);
-int getmax(hint_t *hints, int *colors, int depth);
-int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]);
+int getmax(hint_t *hints, colorlist_t colors, int depth);
+int getmin(hint_t *hints, colorlist_t colors, int depth, prop_t poss[NB_POSS_PLAYER]);
 
 /* Pretty print a propostion. */
 void pr_prop(const prop_t prop) {
@@ -121,7 +121,7 @@ int check(hint_t *hints, const prop_t prop) {
  *  - pattern is used internally. It must be filled with zeros
  * Return number of possibilities generated
  */
-int generate(int *colors, prop_t *possibilities, prop_t pattern) {
+int generate(colorlist_t colors, prop_t *possibilities, prop_t pattern) {
     int jocker = '0';
     int pattern_len, colors_len;
     int total = 0;
@@ -164,7 +164,7 @@ int generate(int *colors, prop_t *possibilities, prop_t pattern) {
  * taking into account jockers. colors is only used to compute number of
  * possibilities.
  */
-int mark(hint_t *hints, prop_t *possibilities, int *colors) {
+int mark(hint_t *hints, prop_t *possibilities, colorlist_t colors) {
     int total = 0;
     int i;
     int nb_unknown;
@@ -202,7 +202,7 @@ int mark(hint_t *hints, prop_t *possibilities, int *colors) {
 /**
  * Apply minmax algorithm
  */
-int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]) {
+int getmin(hint_t *hints, colorlist_t colors, int depth, prop_t poss[NB_POSS_PLAYER]) {
     int num_poss;
     int i, j, k;
     prop_t tmp = { };
@@ -246,7 +246,7 @@ int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]) {
 }
 
 // TODO: support depth == 0 and return result in order to implement "master" mode
-int getmax(hint_t *hints, int *colors, int depth) {
+int getmax(hint_t *hints, colorlist_t colors, int depth) {
     int max = -1;
     int nb_hints;
     int i;
@@ -284,7 +284,7 @@ hint_t history[] = {
 };
 
 int main(int argc, char **argv) {
-    int colors[NB_COLORS + 1] = { A, B, C, D, E, F, 0 };
+    colorlist_t colors = { A, B, C, D, E, F, 0 };
     prop_t poss[3000];
     prop_t tmp = { };
     int num = generate(colors, poss, tmp);
