@@ -38,24 +38,32 @@ typedef int colorlist_t[NB_COLORS];
 int getmax(hint_t *hints, int *colors, int depth);
 int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]);
 
-void print_prop(prop_t poss) {
+/* Pretty print a propostion. */
+void pr_prop(prop_t prop) {
     int j;
+
     printf("  ");
     for (j = 0; j < NB_PLACES; j++)
-        printf("%c", poss[j]);
+        printf("%c", prop[j]);
     printf("->");
     for (; j < NB_PLACES + NB_EXTRA_PLACES; j++)
-        printf(" %3d", poss[j]);
+        printf(" %3d", prop[j]);
     printf("\n");
 }
 
-int print_props(prop_t *possibilities, int score) {
+/* Pretty print a proposition list.
+ * Only print propositon with a particular score (= number of possibilities).
+ * Pass -1 asscore to disable.
+ * Return number of lines displayed.
+ */
+int pr_proplist(prop_t props[], int score) {
     int i;
     int num = 0;
-    for (i = 0; possibilities[i][0]; i++) {
-        if (score == -1 || possibilities[i][NB_PLACES] == score) {
+
+    for (i = 0; props[i][0]; i++) {
+        if (score == -1 || props[i][IDX_NUM_POSS] == score) {
             num++;
-            print_prop(possibilities[i]);
+            pr_prop(props[i]);
         }
     }
     return num;
