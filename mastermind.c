@@ -10,10 +10,20 @@
 #include <limits.h>
 #include <assert.h>
 
-#define NB_PLACES 4
-#define NB_COLORS 6
-#define IDX_PLACE_OK NB_PLACES
-#define IDX_COLOR_OK (NB_PLACES + 1)
+#define NB_COLORS        6
+#define NB_PLACES        4
+#define NB_EXTRA_PLACES  2
+#define IDX_PLACE_OK     NB_PLACES
+#define IDX_COLOR_OK     (NB_PLACES + 1)
+#define IDX_NUM_SYM_POSS NB_PLACES
+#define IDX_NUM_POSS     (NB_PLACES + 1)
+#define NB_POSS_PLAYER   (6 * 6 * 6 * 6 + 1) // 6 ** 4 + 1
+// Note: if (NB_PLACES - 1) are correctly placed, it is not possible to have 1 wrong placed
+#define NB_POSS_MASTER   (((NB_PLACES + 1) * (NB_PLACES + 2)) / 2 - 1 + 1)
+
+typedef int prop_t[NB_PLACES + NB_EXTRA_PLACES];
+typedef int hint_t[NB_PLACES + NB_EXTRA_PLACES];
+typedef int colorlist_t[NB_COLORS];
 
 #define A 'A'
 #define B 'B'
@@ -25,15 +35,18 @@
 #define JOCK '0'
 #define DEBUG 1
 
-typedef int prop_t[NB_PLACES + 2];
-typedef int hint_t[NB_PLACES + 2];
+int getmax(hint_t *hints, int *colors, int depth);
+int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]);
 
 void print_prop(prop_t poss) {
     int j;
     printf("  ");
     for (j = 0; j < NB_PLACES; j++)
         printf("%c", poss[j]);
-    printf("-> %2d %3d\n", poss[NB_PLACES], poss[NB_PLACES + 1]);
+    printf("->");
+    for (; j < NB_PLACES + NB_EXTRA_PLACES; j++)
+        printf(" %3d", poss[j]);
+    printf("\n");
 }
 
 int print_props(prop_t *possibilities, int score) {
@@ -179,10 +192,7 @@ int mark(hint_t *hints, prop_t *possibilities, int *colors) {
 /**
  * Apply minmax algorithm
  */
-int getmax(hint_t *hints, int *colors, int depth);
-int getmin(hint_t *hints, int *colors, int depth, prop_t poss[3000]);
-
-int getmin(hint_t *hints, int *colors, int depth, prop_t poss[3000]) {
+int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]) {
     int num_poss;
     int i, j, k;
     prop_t tmp = { };
@@ -239,7 +249,7 @@ int getmax(hint_t *hints, int *colors, int depth) {
     
     for (hints[nb_hints][IDX_PLACE_OK] = 0; hints[nb_hints][IDX_PLACE_OK] <= NB_PLACES; hints[nb_hints][IDX_PLACE_OK]++) {
         for (hints[nb_hints][IDX_COLOR_OK] = 0; hints[nb_hints][IDX_PLACE_OK] + hints[nb_hints][IDX_COLOR_OK] <= NB_PLACES; hints[nb_hints][IDX_COLOR_OK]++) {
-                prop_t poss_local[3000];
+                prop_t poss_local[NB_POSS_PLAYER] = { };
                 tmp = getmin(hints, colors, depth - 1, poss_local);
                 if (tmp > max)
                     max = tmp;
@@ -264,7 +274,7 @@ hint_t history[] = {
 };
 
 int main(int argc, char **argv) {
-    int colors[NB_COLORS + 1] = { A, B, C, D, E, F, G, 0 };
+    int colors[NB_COLORS + 1] = { A, B, C, D, E, F, 0 };
     prop_t poss[3000];
     prop_t tmp = { };
     int num = generate(colors, poss, tmp);
