@@ -43,8 +43,20 @@ struct debug_parm {
 
 void pr_prop(const prop_t prop);
 int pr_proplist(prop_t props[], int score);
-int getmax(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm);
+int getmax(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, prop_t poss[NB_POSS_MASTER]);
 int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, prop_t poss[NB_POSS_PLAYER]);
+
+/* Return an array of playing possibilities for player.
+ * If colors list does not contains all colors, jockers are used (and number of
+ * generated possibilities is lower).
+ * Return number of generated possibilities
+ */
+int generate_player(colorlist_t colors, prop_t possibilities[NB_POSS_PLAYER]);
+/* Return an array of playing possibilities for master.
+ * player_prop is copied in each result.
+ * Return number of generated possibilities.
+ */
+int generate_master(prop_t player_prop, prop_t possibilities[NB_POSS_MASTER]);
 
 /* Pretty print a propostion. */
 void pr_prop(const prop_t prop) {
@@ -169,6 +181,25 @@ int generate_player(colorlist_t colors, prop_t results[NB_POSS_PLAYER]) {
     return _generate_player(colors, results, pattern);
 }
 
+int generate_master(prop_t pattern, prop_t results[NB_POSS_MASTER]) {
+    int i = 0;
+    int placed, colors;
+    for (placed = 0; placed <= NB_PLACES; placed++) {
+        for (colors = 0; colors + placed <= NB_PLACES; colors++) {
+            if (! (placed == NB_PLACES - 1 && colors == 1)) {
+                memcpy(results[i], pattern, sizeof(int) * NB_PLACES);
+                results[i][IDX_PLACE_OK] = placed;
+                results[i][IDX_COLOR_OK] = colors;
+                //results[i][IDX_NUM_SYM_POSS] = pattern[IDX_NUM_SYM_POSS];
+                //results[i][IDX_NUM_POSS] = -1;
+                i++;
+            }
+        }
+    }
+    results[i][0] = 0;
+    return i;
+}
+
 /**
  * Using hints, mark possibilities valid or not. Return number of possibilities
  * taking into account jockers. colors is only used to compute number of
@@ -238,6 +269,7 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
         for (i = 0; poss[i][0]; i++) {
             if (poss[i][IDX_NUM_POSS] != -1) {
                 int colors_local[NB_COLORS + 1];
+                prop_t poss_local[NB_POSS_PLAYER] = { };
                 memcpy(hints[nb_hints], poss[i], sizeof(hints[nb_hints]));
                 memcpy(colors_local, colors, sizeof(colors_local));
                 for (j = 0; poss[i][j]; j++) {
@@ -246,13 +278,12 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
                     if (!colors_local[k])
                         colors_local[k] = poss[i][j];
                 }
-                poss[i][IDX_NUM_POSS] = getmax(hints, colors_local, depth, debug_parm);
+                poss[i][IDX_NUM_POSS] = getmax(hints, colors_local, depth, debug_parm, poss_local);
                 assert(poss[i][IDX_NUM_POSS] > 0);
                 if (poss[i][IDX_NUM_POSS] < min)
                     min = poss[i][IDX_NUM_POSS];
             }
         }
-        hints[nb_hints][0] = 0;
     }
     if (debug_parm && debug_parm->debug_depth <= depth) {
         printf("%d ", depth);
@@ -264,16 +295,17 @@ int getmin(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
         if (min == 0)
             printf(" (no-solutions)");
         printf("\n");
+        if (debug_parm->details <= depth)
+            pr_proplist(poss, min);
     }
     return min;
 }
 
 // TODO: support depth == 0 and return result in order to implement "master" mode
-int getmax(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm) {
+int getmax(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, prop_t poss[NB_POSS_MASTER]) {
     int max = -1;
     int nb_hints;
     int i;
-    int tmp;
 
     if (debug_parm && debug_parm->initial_depth == 0)
         debug_parm->initial_depth = depth;
@@ -282,20 +314,24 @@ int getmax(hint_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
     for (i = 0; hints[i][0]; i++)
         ;
     nb_hints = i - 1;
+    
+    generate_master(hints[nb_hints], poss);
 
-    for (hints[nb_hints][IDX_PLACE_OK] = 0; hints[nb_hints][IDX_PLACE_OK] <= NB_PLACES; hints[nb_hints][IDX_PLACE_OK]++) {
-        for (hints[nb_hints][IDX_COLOR_OK] = 0; hints[nb_hints][IDX_PLACE_OK] + hints[nb_hints][IDX_COLOR_OK] <= NB_PLACES; hints[nb_hints][IDX_COLOR_OK]++) {
-            prop_t poss_local[NB_POSS_PLAYER] = { };
-            tmp = getmin(hints, colors, depth - 1, debug_parm, poss_local);
-            if (tmp > max)
-                max = tmp;
-        }
+    for (i = 0; poss[i][0]; i++) {
+        prop_t poss_local[NB_POSS_PLAYER] = { };
+        memcpy(hints[nb_hints], poss[i], sizeof(hints[nb_hints]));
+        poss[i][IDX_NUM_POSS] = getmin(hints, colors, depth - 1, debug_parm, poss_local);
+        if (poss[i][IDX_NUM_POSS] > max)
+            max = poss[i][IDX_NUM_POSS];
     }
+    hints[nb_hints][0] = 0;
     if (debug_parm && debug_parm->debug_depth <= depth) {
         printf("%d ", depth);
         for (i = 0; i < debug_parm->initial_depth - depth; i++)
             printf("    ");
         printf("  Got max=%d\n", max);
+        if (debug_parm->details <= depth)
+            pr_proplist(poss, max);
     }
     return max;
 }
@@ -318,7 +354,8 @@ hint_t history[] = {
 int main(int argc, char **argv) {
     colorlist_t colors = { A, B, C, D, E, F, 0 };
     struct debug_parm debug_parm = {
-        .debug_depth = 2,
+        .debug_depth = 1,
+        .details = 2
     };
     prop_t poss[NB_POSS_PLAYER];
     int num = generate_player(colors, poss);
