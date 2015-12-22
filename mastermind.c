@@ -291,12 +291,12 @@ int main(int argc, char **argv) {
     int ret;
     printf("%d\n", num);
     num = mark(history, poss, colors);
-    print_props(poss, -1);
+    pr_proplist(poss, -1);
     printf("%d possibilities\n", num);
 
     ret = getmin(history, colors, 1, poss);
     printf("Best score : %d\n", ret);
-    ret = print_props(poss, ret);
+    ret = pr_proplist(poss, ret);
     printf("Num best scores : %d\n", ret);
     return 0;
 }
