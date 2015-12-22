@@ -237,7 +237,7 @@ int getmin(hint_t *hints, int *colors, int depth, prop_t poss[NB_POSS_PLAYER]) {
 
 // TODO: support depth == 0 and return result in order to implement "master" mode
 int getmax(hint_t *hints, int *colors, int depth) {
-    int max = 0;
+    int max = -1;
     int nb_hints;
     int i;
     int tmp;
