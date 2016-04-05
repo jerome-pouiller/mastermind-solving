@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
         S( A, B, C, D,         3, 0, 123, 1 ),
         S( ),
     };
+    masterPossibleShots_t master;
 
     prShot(solo);
     printf("\n");
@@ -30,6 +31,10 @@ int main(int argc, char **argv) {
     ret = prShots(history, -1);
     printf("Printed %d shots\n", ret);
     ret = prShots(history, 1);
+    printf("Printed %d shots\n", ret);
+    ret = filterShots(master.d, history, 1);
+    printf("Got %d shots\n", ret);
+    ret = prShots(master.d, -1);
     printf("Printed %d shots\n", ret);
 
     return 0;
