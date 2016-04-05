@@ -41,6 +41,22 @@ int prShots(shot_t shots[], int score) {
     return num;
 }
 
+int getUsedColors(shot_t history[], colorlist_t *colors) {
+    int i, j, k;
+    int nb = 0;
+    memset(colors, 0, sizeof(*colors));
+    for (i = 0; history[i].d[0]; i++) {
+        for (j = 0; j < NB_PLACES; j++) {
+            for (k = 0; k < nb && colors->d[k] != history[i].d[j]; k++)
+                ;
+            if (k == nb)
+                colors->d[nb++] = history[i].d[j];
+        }
+    }
+    return nb;
+}
+
+
 int filterShots(shot_t out[], shot_t in[], int score) {
     int i, j = 0;
 

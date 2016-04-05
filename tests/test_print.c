@@ -14,15 +14,16 @@
 int main(int argc, char **argv) {
     int ret;
 
-    shot_t solo = S(A, B, C, D,         0, 3);
+    shot_t solo = S(A, B, C, D);
     shot_t history[] = {
-        S( A, B, C, D,         0, 3 ),
-        S( '0', '1', '2', '3', 1, 2 ),
-        S( A, B, C, D,         2, 1,   3, 4 ),
-        S( A, B, C, D,         3, 0, 123, 1 ),
+        S( A, B, C, D,     0, 3 ),
+        S( A, B, '0', '1', 1, 2 ),
+        S( A, B, C, D,     2, 1,   3, 4 ),
+        S( A, B, C, D,     3, 0, 123, 1 ),
         S( ),
     };
     masterPossibleShots_t master;
+    colorlist_t colors;
 
     prShot(solo);
     printf("\n");
@@ -36,6 +37,10 @@ int main(int argc, char **argv) {
     printf("Got %d shots\n", ret);
     ret = prShots(master.d, -1);
     printf("Printed %d shots\n", ret);
+    ret = prShots(master.d, -1);
+    printf("Printed %d shots\n", ret);
+    ret = getUsedColors(history, &colors);
+    printf("%d colors are used\n", ret);
 
     return 0;
 }
