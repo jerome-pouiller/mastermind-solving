@@ -10,11 +10,19 @@
 
 // Number of color in game
 #define NB_COLORS        6
+
 // Number of place in game
 #define NB_PLACES        4
 
 // Number of place for hints
 #define NB_HINTS         2
+
+// Number of extra places in shot_t
+#define NB_EXTRA         2
+// Index number of symetry in this shot (should be 0 if there is no jocker)
+#define IDX_NUM_SYM      (NB_PLACES + NB_HINTS + 0)
+// Index of score (=number of possibilityes for player/master after this shot).
+#define IDX_SCORE        (NB_PLACES + NB_HINTS + 1)
 
 // Number of possible shots for player (used to store results)
 #define NB_POSS_PLAYER   (6 * 6 * 6 * 6) // 6 ** 4
@@ -23,13 +31,14 @@
 // Note: if (NB_PLACES - 1) are correctly placed, it is not possible to have 1 wrong placed
 #define NB_POSS_MASTER   (((NB_PLACES + 1) * (NB_PLACES + 2)) / 2 - 1)
 
+
 typedef struct {
-    int d[NB_PLACES + NB_HINT + NB_EXTRA];
-} shot_t
+    int d[NB_PLACES + NB_HINTS + NB_EXTRA];
+} shot_t;
 
 typedef struct {
     int d[NB_COLORS + 1];
-} colorslist_t;
+} colorlist_t;
 
 typedef struct {
     shot_t d[NB_POSS_PLAYER + 1];
@@ -39,14 +48,23 @@ typedef struct {
     shot_t d[NB_POSS_MASTER + 1];
 } masterPossibleShots_t;
 
+typedef struct {
+} debug_t;
+
+// Helper to initialise shot_t, Exemple:
+// shot_t s = S(A, B, C, D, 0, 1);
+#define S(...)  { .d = { __VA_ARGS__ } }
+
 // Helpers to define histories
-#define A 'A'
-#define B 'B'
-#define C 'C'
-#define D 'D'
-#define E 'E'
-#define F 'F'
-#define G 'G'
+#define COLOR_OFFSET 'A'
+#define JOCKER_OFFSET '0'
+#define A (COLOR_OFFSET + 0)
+#define B (COLOR_OFFSET + 1)
+#define C (COLOR_OFFSET + 2)
+#define D (COLOR_OFFSET + 3)
+#define E (COLOR_OFFSET + 4)
+#define F (COLOR_OFFSET + 5)
+#define G (COLOR_OFFSET + 6)
 
 /*
  * Get list of used colors in shot list
@@ -55,15 +73,16 @@ int getUsedColors(shot_t history[], colorlist_t *colors);
 
 /*
  * Get list of possible shots for player with given colorlist. Use jocker for
- * not yet used colors. Result size must be at least SIZE_POSS_PLAYER
+ * not yet used colors.
  */
 int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results);
 
 /*
- * Get list of possible shots for master. Result size must be at least
- * SIZE_POSS_MASTER
+ * Get list of possible shots for master. You can provide an initial shot that
+ * will copied in each result entry.
+ * Pass NULL as result if only want to know number of possible shots.
  */
-int getPossibleMasterShots(masterPossibleShots_t *results);
+int getPossibleMasterShots(shot_t currentShot, masterPossibleShots_t *results);
 
 /*
  * Get list of possible shots with given history. If last entry of entry do not
@@ -106,7 +125,7 @@ int prShots(shot_t shots[], int score);
 /*
  * Pretty print one shot
  */
-int prShot(const shot shot);
+void prShot(const shot_t shot);
 
 #endif /* MASTERMIND_H */
 
