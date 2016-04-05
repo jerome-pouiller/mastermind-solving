@@ -8,6 +8,7 @@
 #include "mastermind.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #define DEBUG
 
@@ -40,5 +41,15 @@ int prShots(shot_t shots[], int score) {
     return num;
 }
 
+int filterShots(shot_t out[], shot_t in[], int score) {
+    int i, j = 0;
 
+    for (i = 0; in[i].d[0]; i++)
+        if (in[i].d[IDX_SCORE] <= score) {
+            memcpy(out + j, in + i, sizeof(shot_t));
+            j++;
+        }
+    out[j].d[0] = 0;
+    return j;
+}
 
