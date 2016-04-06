@@ -7,28 +7,41 @@
 CFLAGS += -Wall
 PREFIX = /usr/local
 
-all: tests init_and_print
+all: compute_symetry init_and_print libmastermind.so
 
-# tests: LDLIBS += -lm
-tests: tests.o mastermind.o
-init_and_print: init_and_print.o mastermind.o
+compute_symetry: compute_symetry.o libmastermind.a
+init_and_print: init_and_print.o libmastermind.a
+
+libmastermind.a: mastermind.o
+	$(AR) $(ARFLAGS) $@ $<
+
+libmastermind.so: LDFLAGS=-shared
+libmastermind.so: mastermind_shared.o
+	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
 -include init_and_print.d
--include tests.d
+-include compute_symetry.d
 -include mastermind.d
+-include mastermind_shared.d
 
+%_shared.o: %.c
+	$(COMPILE.c) -MMD -fPIC $(OUTPUT_OPTION) $<
 
 %.o: %.c
-	$(COMPILE.c) -MMD -c -o $@ $<
+	$(COMPILE.c) -MMD $(OUTPUT_OPTION) $<
 
 clean:
 	$(RM) *.o *.d
 
 distclean: clean
-	$(RM) tests init_and_print
+	$(RM) compute_symetry init_and_print libmastermind.so libmastermind.a
 
 install:
+	install -m 755 -d $(DESTDIR)$(PREFIX)/lib
+	install -m 644 libmastermind.a $(DESTDIR)$(PREFIX)/lib
+	install -m 644 libmastermind.so $(DESTDIR)$(PREFIX)/lib
 	install -m 755 -d $(DESTDIR)$(PREFIX)/bin
-	install -m 755 tests $(DESTDIR)$(PREFIX)/bin
+	install -m 755 compute_symetry $(DESTDIR)$(PREFIX)/bin
 	install -m 755 init_and_print $(DESTDIR)$(PREFIX)/bin
 
 
