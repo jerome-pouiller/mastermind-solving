@@ -21,9 +21,15 @@
 
 // Number of extra places in shot_t
 #define NB_EXTRA         2
-// Index number of symetry in this shot (should be 0 if there is no jocker)
+// Index number of symetry in this shot (should be 0 if there is no jocker).
+//  0 means uninitialized
 #define IDX_NUM_SYM      (NB_PLACES + NB_HINTS + 0)
 // Index of score (=number of possibilityes for player/master after this shot).
+// ?? means unitialized
+// ?? means shot is possible, but we don't known the score
+// -1 means this shot is not possible
+//  0 means we garantee this shot to be correct
+//  1 means we garantee this shot or next one will be correct
 #define IDX_SCORE        (NB_PLACES + NB_HINTS + 1)
 
 // Number of possible shots for player (used to store results)
