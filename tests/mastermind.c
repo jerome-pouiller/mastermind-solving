@@ -162,3 +162,52 @@ static int check(shot_t hints[], const shot_t *prop) {
     return 0;
 }
 
+
+/*
+ * Generate a list of possibilities.
+ *  - possibilities must be big enough (pow(NB_COLORs, NB_PLACES))
+ *  - colors is set of already used colors (if num of already used colors is == NB_COLORS, no jocker are used)
+ *  - pattern is used internally. It must be filled with zeros
+ * Return number of possibilities generated
+ */
+static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *results, shot_t *pattern) {
+    int jocker = JOCKER_OFFSET;
+    int pattern_len, colors_len;
+    int total = 0;
+    int i;
+
+    for (i = 0; pattern->d[i]; i++)
+        ;
+    pattern_len = i;
+
+    for (i = 0; colors->d[i]; i++) {
+        if (colors->d[i] >= jocker && colors->d[i] < JOCKER_OFFSET + NB_COLORS)
+            jocker = colors->d[i] + 1;
+    }
+    colors_len = i;
+
+    for (i = 0; i < colors_len + 1; i++) {
+        if (i < NB_COLORS) {
+            if (i == colors_len)
+                colors->d[colors_len] = jocker;
+            pattern->d[pattern_len] = colors->d[i];
+            if (pattern_len < NB_PLACES - 1) {
+                total += _getPossiblePlayerShots(colors, results + total, pattern);
+            } else {
+                memcpy(results + total, pattern, sizeof(shot_t));
+                total++;
+            }
+            if (i == colors_len)
+                colors->d[colors_len] = 0;
+        }
+    }
+    pattern->d[pattern_len] = 0;
+    if (!pattern_len)
+        results[total].d[0] = 0;
+    return total;
+}
+
+int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results) {
+    shot_t pattern = S();
+    return _getPossiblePlayerShots(colors, results->d, &pattern);
+}
