@@ -124,7 +124,7 @@ int computeSymteries(shot_t shots[], colorlist_t *colors);
  * Filter results to only keep results with a score higher then score. Return
  * number of results.
  */
-int filterShots(shot_t in[], shot_t out[], int score);
+int filterShots(shot_t out[], shot_t in[], int score);
 
 /*
  * Pretty print result with a score high then score. Return number of printed
