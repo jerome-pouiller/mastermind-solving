@@ -120,3 +120,45 @@ int filterShots(shot_t out[], shot_t in[], int score) {
     return j;
 }
 
+/**
+ * Check if a proposition is valid compared to one hint
+ */
+static int checkone(const shot_t *hint, const shot_t *prop) {
+    int i, j;
+    int count;
+    int used[NB_PLACES] = { 0 };
+
+    count = 0;
+    for (i = 0; i < NB_PLACES; i++)
+        if (prop->d[i] == hint->d[i]) {
+            used[i] = 3;
+            count++;
+        }
+    if (count != hint->d[IDX_HINT_PLACE])
+        return -1;
+    count = 0;
+    for (i = 0; i < NB_PLACES; i++)
+        if (!(used[i] & 1))
+            for (j = 0; j < NB_PLACES; j++)
+                if (!(used[j] & 2) && prop->d[i] == hint->d[j]) {
+                    //used[i] |= 1;
+                    used[j] |= 2;
+                    count++;
+                }
+    if (count != hint->d[IDX_HINT_COLOR])
+        return -1;
+
+    return 0;
+}
+
+/**
+ * Check if a proposition is valid compared to multiple hints
+ */
+static int check(shot_t hints[], const shot_t *prop) {
+    int i;
+    for (i = 0; hints[i].d[0]; i++)
+        if (checkone(hints + i, prop) == -1)
+            return -1;
+    return 0;
+}
+
