@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define DEBUG
 
@@ -39,6 +40,56 @@ int prShots(shot_t shots[], int score) {
         }
     }
     return num;
+}
+
+int getNumShots(shot_t shots[], int score) {
+    int i;
+    int num = 0;
+
+    for (i = 0; shots[i].d[0]; i++)
+        if (score == -1 || shots[i].d[IDX_SCORE] <= score)
+            num++;
+    return num;
+}
+
+int getNumRealShots(shot_t shots[], int score) {
+    int i;
+    int num = 0;
+
+    for (i = 0; shots[i].d[0]; i++)
+        if (score == -1 || shots[i].d[IDX_SCORE] <= score) {
+            assert(shots[i].d[IDX_NUM_SYM]); // Uninitialized value
+            num += shots[i].d[IDX_NUM_SYM];
+        }
+    return num;
+}
+
+int computeSymteries(shot_t shots[], colorlist_t *colors) {
+    int total = 0;
+    int i, j;
+    int nb_unknown_orig;
+    char lst_jocker_orig = JOCKER_OFFSET - 1;
+
+    for (i = 0; colors->d[i]; i++)
+        if (colors->d[i] > lst_jocker_orig && colors->d[i] < JOCKER_OFFSET + NB_COLORS)
+            lst_jocker_orig = colors->d[i];
+    nb_unknown_orig = NB_COLORS - i;
+    for (i = 0; shots[i].d[0]; i++) {
+        char lst_jocker = lst_jocker_orig;
+        int nb_unknown = nb_unknown_orig;
+        int cnt = 1;
+        for (j = 0; j < NB_PLACES; j++) {
+            if (shots[i].d[j] > lst_jocker && shots[i].d[j] < JOCKER_OFFSET + NB_COLORS) {
+                lst_jocker = shots[i].d[j];
+                cnt *= nb_unknown;
+                nb_unknown--;
+            }
+        }
+        assert(cnt > 0);
+        shots[i].d[IDX_NUM_SYM] = cnt;
+        total += cnt;
+    }
+    return total;
 }
 
 int getUsedColors(shot_t history[], colorlist_t *colors) {

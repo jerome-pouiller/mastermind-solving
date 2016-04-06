@@ -16,6 +16,8 @@
 
 // Number of place for hints
 #define NB_HINTS         2
+#define IDX_HINT_PLACE   (NB_PLACES + 0)
+#define IDX_HINT_COLOR   (NB_PLACES + 1)
 
 // Number of extra places in shot_t
 #define NB_EXTRA         2
@@ -100,15 +102,23 @@ int getPossibleGameShots(shot_t history[], playerPossibleShots_t *results);
 int getBestShot(shot_t history[], int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg);
 
 /*
- * From a shot list, return number of entries with a score better or equal to score
+ * From a shot list, return number of entries (without taking account jockers)
+ * with a score better or equal to score
  */
 int getNumShots(shot_t shots[], int score);
 
 /*
- * From a shot list, return real (taking acount jockers) number of shots with a
- * score better or equal to score.
+ * From a shot list, return real (taking account jockers) number of shots with a
+ * score better or equal to score. Make sure symtery information is available in
+ * shots (by calling computeSymetries() before, for example).
  */
-int getNumRealShots(shot_t shots[], colorlist_t *colors, int score);
+int getNumRealShots(shot_t shots[], int score);
+
+/*
+ * Complete all symteries information in shot list. colors have to contains all
+ * used colors (you can use getUsedColors() for that).
+ */
+int computeSymteries(shot_t shots[], colorlist_t *colors);
 
 /*
  * Filter results to only keep results with a score higher then score. Return
