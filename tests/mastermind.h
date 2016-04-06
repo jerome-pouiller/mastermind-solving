@@ -90,7 +90,7 @@ int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results);
  * will copied in each result entry.
  * Pass NULL as result if only want to know number of possible shots.
  */
-int getPossibleMasterShots(shot_t currentShot, masterPossibleShots_t *results);
+int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results);
 
 /*
  * Get list of possible shots with given history. If last entry of entry do not
