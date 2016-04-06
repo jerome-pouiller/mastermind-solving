@@ -121,10 +121,11 @@ int getNumShots(shot_t shots[], int score);
 int getNumRealShots(shot_t shots[], int score);
 
 /*
- * Complete all symteries information in shot list. colors have to contains all
- * used colors (you can use getUsedColors() for that).
+ * Given already used colors in history, complete all symetries information of
+ * a shot list. colors have to contains all used colors (you can use
+ * getUsedColors() for that).
  */
-int computeSymteries(shot_t shots[], colorlist_t *colors);
+int computeSymetries(shot_t shots[], colorlist_t *colors);
 
 /*
  * Filter results to only keep results with a score higher then score. Return
