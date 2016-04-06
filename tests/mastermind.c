@@ -216,3 +216,22 @@ int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results) 
     shot_t pattern = S();
     return _getPossiblePlayerShots(colors, results->d, &pattern);
 }
+
+int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results) {
+    int i = 0;
+    int placed, colors;
+    for (placed = 0; placed <= NB_PLACES; placed++) {
+        for (colors = 0; colors + placed <= NB_PLACES; colors++) {
+            if (! (placed == NB_PLACES - 1 && colors == 1)) {
+                memcpy(results->d + i, currentShot, sizeof(*currentShot));
+                results->d[i].d[IDX_HINT_PLACE] = placed;
+                results->d[i].d[IDX_HINT_COLOR] = colors;
+                //results->d[i].d[IDX_NUM_SYM] = pattern[IDX_NUM_SYM];
+                //results->d[i].d[IDX_SCORE] = -1;
+                i++;
+            }
+        }
+    }
+    results->d[i].d[0] = 0;
+    return i;
+}
