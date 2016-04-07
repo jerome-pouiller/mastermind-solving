@@ -22,6 +22,8 @@ int main(int argc, char **argv) {
     printf("Best score: %d\n", ret);
     printf("Number of best scores: %d (real: %d)\n", getNumShots(results.d, ret), getNumRealShots(results.d, ret));
     prShots(results.d, ret);
+    printf("All possible shots: %d (real: %d)\n", getNumShots(results.d, -1), getNumRealShots(results.d, -1));
+    prShots(results.d, -1);
     return 0;
 }
 
