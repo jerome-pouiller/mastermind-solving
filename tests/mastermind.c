@@ -287,8 +287,10 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
                 for (j = 0; results->d[i].d[j]; j++) {
                     for (k = 0; colors_local.d[k] && results->d[i].d[j] != colors_local.d[k]; k++)
                         ;
-                    if (!colors_local.d[k])
+                    if (!colors_local.d[k]) {
                         colors_local.d[k] = results->d[i].d[j];
+                        colors_local.d[k + 1] = 0;
+                    }
                 }
                 results->d[i].d[IDX_SCORE] = getMax(history, &colors_local, minMaxDepth - 1, &local, dbg);
                 assert(results->d[i].d[IDX_SCORE] > 0);
