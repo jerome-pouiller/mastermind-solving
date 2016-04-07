@@ -136,7 +136,8 @@ int filterShots(shot_t out[], shot_t in[], int score) {
 }
 
 /**
- * Check if a proposition is valid compared to one hint
+ * Check if a shot (for player) is valid compared to one hint. This function
+ * does not exist for master since it does really make sense.
  */
 static int checkone(const shot_t *hint, const shot_t *prop) {
     int i, j;
