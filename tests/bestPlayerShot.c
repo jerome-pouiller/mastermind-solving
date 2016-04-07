@@ -6,7 +6,7 @@
  *     - Jérôme Pouiller <jezz@sysmic.org>
  */
 #include <stdio.h>
-#include <mastermind.h>
+#include "mastermind.h"
 
 static const int minMaxDepth = 1;
 
@@ -14,14 +14,14 @@ int main(int argc, char **argv) {
     int ret;
     playerPossibleShots_t results;
     shot_t history[] = {
-        { A, A, B, C, 0, 0 },
-        { -1 }
+        S(A, A, B, C, 0, 0),
+        S()
     };
 
-    ret = getBestShot(history, minMaxDepth, results, NULL)
-    printf("Best score : %d\n", ret);
-    printf("Number of best scores : %d\n", getNumShots(results, ret), getNumRealShots(results, ret));
-    prShots(results, ret);
+    ret = getBestShot(history, minMaxDepth, results.d, NULL);
+    printf("Best score: %d\n", ret);
+    printf("Number of best scores: %d (real: %d)\n", getNumShots(results.d, ret), getNumRealShots(results.d, ret));
+    prShots(results.d, ret);
     return 0;
 }
 
