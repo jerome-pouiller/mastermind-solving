@@ -20,10 +20,10 @@ int main(int argc, char **argv) {
 
     ret = getBestShot(history, minMaxDepth, results.d, NULL);
     printf("Best score: %d\n", ret);
-    printf("Number of best scores: %d (real: %d)\n", getNumShots(results.d, ret), getNumRealShots(results.d, ret));
-    prShots(results.d, ret);
-    printf("All possible shots: %d (real: %d)\n", getNumShots(results.d, -1), getNumRealShots(results.d, -1));
-    prShots(results.d, -1);
+    printf("Number of best scores: %d (real: %d)\n", getNumShots(results.d, '<', ret), getNumRealShots(results.d, '<', ret));
+    prShots(results.d, '<', ret);
+    printf("All possible shots: %d (real: %d)\n", getNumShots(results.d, 0, 0), getNumRealShots(results.d, 0, 0));
+    prShots(results.d, 0, 0);
     return 0;
 }
 

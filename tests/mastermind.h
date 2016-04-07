@@ -116,14 +116,14 @@ int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], debug_t *db
  * From a shot list, return number of entries (without taking account jockers)
  * with a score better or equal to score
  */
-int getNumShots(shot_t shots[], int score);
+int getNumShots(shot_t shots[], char op, int score);
 
 /*
  * From a shot list, return real (taking account jockers) number of shots with a
  * score better or equal to score. Make sure symtery information is available in
  * shots (by calling computeSymetries() before, for example).
  */
-int getNumRealShots(shot_t shots[], int score);
+int getNumRealShots(shot_t shots[], char op, int score);
 
 /*
  * Given already used colors in history, complete all symetries information of
@@ -136,13 +136,13 @@ int computeSymetries(shot_t shots[], colorlist_t *colors);
  * Filter results to only keep results with a score higher then score. Return
  * number of results. Arrays out and in can be the same.
  */
-int filterShots(shot_t out[], shot_t in[], int score);
+int filterShots(shot_t out[], shot_t in[], char op, int score);
 
 /*
  * Pretty print result with a score high then score. Return number of printed
  * results (same than getNumShots()).
  */
-int prShots(shot_t shots[], int score);
+int prShots(shot_t shots[], char op, int score);
 
 /*
  * Pretty print one shot
