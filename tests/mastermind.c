@@ -36,40 +36,46 @@ void prShot(const shot_t shot) {
 #endif
 }
 
-int prShots(shot_t shots[], int score) {
+int prShots(shot_t shots[], char op, int score) {
     int i;
     int num = 0;
+    int len = getHistoryLen(shots);
+    shot_t tmp[len + 1];
 
-    for (i = 0; shots[i].d[0]; i++) {
-        if (score == -1 || shots[i].d[IDX_SCORE] <= score) {
-            num++;
-            printf("  ");
-            prShot(shots[i]);
-            printf("\n");
-        }
+    filterShots(tmp, shots, op, score);
+    for (i = 0; tmp[i].d[0]; i++) {
+        num++;
+        printf("  ");
+        prShot(tmp[i]);
+        printf("\n");
     }
     return num;
 }
 
-int getNumShots(shot_t shots[], int score) {
+int getNumShots(shot_t shots[], char op, int score) {
     int i;
     int num = 0;
+    int len = getHistoryLen(shots);
+    shot_t tmp[len + 1];
 
-    for (i = 0; shots[i].d[0]; i++)
-        if (score == -1 || shots[i].d[IDX_SCORE] <= score)
-            num++;
+    filterShots(tmp, shots, op, score);
+    for (i = 0; tmp[i].d[0]; i++)
+        num++;
+
     return num;
 }
 
-int getNumRealShots(shot_t shots[], int score) {
+int getNumRealShots(shot_t shots[], char op, int score) {
     int i;
     int num = 0;
+    int len = getHistoryLen(shots);
+    shot_t tmp[len + 1];
 
-    for (i = 0; shots[i].d[0]; i++)
-        if (score == -1 || shots[i].d[IDX_SCORE] <= score) {
-            assert(shots[i].d[IDX_NUM_SYM]); // Uninitialized value
-            num += shots[i].d[IDX_NUM_SYM];
-        }
+    filterShots(tmp, shots, op, score);
+    for (i = 0; tmp[i].d[0]; i++) {
+        assert(tmp[i].d[IDX_NUM_SYM]); // Uninitialized value
+        num += tmp[i].d[IDX_NUM_SYM];
+    }
     return num;
 }
 
@@ -122,15 +128,36 @@ int getUsedColors(shot_t history[], colorlist_t *colors) {
     return nb;
 }
 
-int filterShots(shot_t out[], shot_t in[], int score) {
+int filterShots(shot_t out[], shot_t in[], char op, int score) {
     int i, j = 0;
 
-    for (i = 0; in[i].d[0]; i++)
-        if (in[i].d[IDX_SCORE] <= score) {
-            // memmove is a no-op if out + j == in + i
+    // Note: memmove is a no-op if out + j == in + i
+    if (op == '=') {
+        for (i = 0; in[i].d[0]; i++)
+            if (in[i].d[IDX_SCORE] != score) {
+                memmove(out + j, in + i, sizeof(shot_t));
+                j++;
+            }
+    } else if (op == '>') {
+        for (i = 0; in[i].d[0]; i++)
+            if (in[i].d[IDX_SCORE] <= score) {
+                memmove(out + j, in + i, sizeof(shot_t));
+                j++;
+            }
+    } else if (op == '<') {
+        for (i = 0; in[i].d[0]; i++)
+            if (in[i].d[IDX_SCORE] >= score) {
+                memmove(out + j, in + i, sizeof(shot_t));
+                j++;
+            }
+    } else if (op == 0 || op == ' ') { // No-op
+        for (i = 0; in[i].d[0]; i++) {
             memmove(out + j, in + i, sizeof(shot_t));
             j++;
         }
+    } else {
+        assert(0); // Bad operator
+    }
     out[j].d[0] = 0;
     return j;
 }
@@ -268,7 +295,7 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
         results->d[i].d[IDX_SCORE] = check(history, results->d + i);
-    filterShots(results->d, results->d, INT_MAX - 1);
+    filterShots(results->d, results->d, '>', INT_MAX - 1);
     num_poss = computeSymetries(results->d, colors);
     if (num_poss == 0) {
         min = INT_MAX;
@@ -344,7 +371,7 @@ int getPossibleGameShots(shot_t history[], playerPossibleShots_t *results) {
         getPossiblePlayerShots(&colors, results);
         for (i = 0; results->d[i].d[0]; i++)
             results->d[i].d[IDX_SCORE] = check(history, results->d + i);
-        ret = filterShots(results->d, results->d, INT_MAX - 1);
+        ret = filterShots(results->d, results->d, '>', INT_MAX - 1);
         return ret;
     } else {
         assert(0); // Not yet implemented

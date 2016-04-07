@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     colorlist_t colors;
     getUsedColors(history, &colors);
     computeSymetries(propositons, &colors);
-    prShots(propositons, -1);
+    prShots(propositons, 0, 0);
 
     return 0;
 }
