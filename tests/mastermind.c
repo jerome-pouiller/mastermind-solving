@@ -176,7 +176,7 @@ static int check(shot_t hints[], const shot_t *prop) {
  *  - pattern is used internally. It must be filled with zeros
  * Return number of possibilities generated
  */
-static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *results, shot_t *pattern) {
+static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *pattern, shot_t results[]) {
     int jocker = JOCKER_OFFSET;
     int pattern_len, colors_len;
     int total = 0;
@@ -198,7 +198,7 @@ static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *results, shot_t 
                 colors->d[colors_len] = jocker;
             pattern->d[pattern_len] = colors->d[i];
             if (pattern_len < NB_PLACES - 1) {
-                total += _getPossiblePlayerShots(colors, results + total, pattern);
+                total += _getPossiblePlayerShots(colors, pattern, results + total);
             } else {
                 memcpy(results + total, pattern, sizeof(shot_t));
                 total++;
@@ -217,7 +217,7 @@ int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results) 
     shot_t pattern = S();
     pattern.d[IDX_HINT_PLACE] = -1;
     pattern.d[IDX_HINT_COLOR] = -1;
-    return _getPossiblePlayerShots(colors, results->d, &pattern);
+    return _getPossiblePlayerShots(colors, &pattern, results->d);
 }
 
 int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results) {
