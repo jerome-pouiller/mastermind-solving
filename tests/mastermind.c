@@ -14,6 +14,14 @@
 
 #define DEBUG
 
+static int getHistoryLen(shot_t shots[]) {
+    int i;
+
+    for (i = 0; shots[i].d[0]; i++)
+        ;
+    return i;
+}
+
 void prShot(const shot_t shot) {
     int i;
 
@@ -242,3 +250,124 @@ int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results) 
     results->d[i].d[0] = 0;
     return i;
 }
+
+int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, debug_t *dbg);
+int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg);
+
+int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg) {
+    int num_poss;
+    int i, j, k;
+    int history_len;
+    int min;
+
+    history_len = getHistoryLen(history);
+    getPossiblePlayerShots(colors, results);
+    for (i = 0; results->d[i].d[0]; i++)
+        results->d[i].d[IDX_SCORE] = check(history, results->d + i);
+    filterShots(results->d, results->d, INT_MAX - 1);
+    num_poss = computeSymetries(results->d, colors);
+    if (num_poss == 0) {
+        min = INT_MAX;
+    } else if (!minMaxDepth || num_poss == 1) {
+        for (i = 0; results->d[i].d[0]; i++)
+            results->d[i].d[IDX_SCORE] = num_poss;
+        min = num_poss;
+    } else {
+        min = INT_MAX;
+        for (i = 0; results->d[i].d[0]; i++) {
+            if (results->d[i].d[IDX_SCORE] != INT_MAX) {
+                colorlist_t colors_local;
+                masterPossibleShots_t local = { };
+                memcpy(history + history_len, results + i, sizeof(shot_t));
+                memcpy(&colors_local, colors, sizeof(colors_local));
+                for (j = 0; results->d[i].d[j]; j++) {
+                    for (k = 0; colors_local.d[k] && results->d[i].d[j] != colors_local.d[k]; k++)
+                        ;
+                    if (!colors_local.d[k])
+                        colors_local.d[k] = results->d[i].d[j];
+                }
+                results->d[i].d[IDX_SCORE] = getMax(history, &colors_local, minMaxDepth - 1, &local, dbg);
+                assert(results->d[i].d[IDX_SCORE] > 0);
+                if (results->d[i].d[IDX_SCORE] < min)
+                    min = results->d[i].d[IDX_SCORE];
+            }
+        }
+    }
+    if (dbg && dbg->onMin)
+        dbg->onMin(results->d, min, dbg);
+    return min;
+}
+
+int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, debug_t *dbg) {
+    int max = 0;
+    int history_len;
+    int i;
+
+    assert(minMaxDepth >= 0);
+    history_len = getHistoryLen(history) - 1;
+    assert(history_len >= 0); // It make no mean for master to play first.
+
+    // Note: it is difficult to filter impossible shots here nor compute score
+    // here. It is easier to ask to getMin to do the job. Consequently, we 
+    // can't just return results in getMax().
+    getPossibleMasterShots(history + history_len, results);
+
+    history[history_len + 1].d[0] = 0;
+    for (i = 0; results->d[i].d[0]; i++) {
+        playerPossibleShots_t local = { };
+        memcpy(history + history_len, results->d + i, sizeof(shot_t));
+        results->d[i].d[IDX_SCORE] = getMin(history, colors, minMaxDepth, &local, dbg);
+        if (results->d[i].d[IDX_SCORE] > max && results->d[i].d[IDX_SCORE] < INT_MAX)
+            max = results->d[i].d[IDX_SCORE];
+    }
+    if (dbg && dbg->onMax)
+        dbg->onMax(results->d, max, dbg);
+    return max;
+}
+
+// Same than getPossiblePlayerShots, but filter out impossile shots
+int getPossibleGameShots(shot_t history[], playerPossibleShots_t *results) {
+    int i;
+    int ret;
+    int history_len;
+    colorlist_t colors;
+
+    getUsedColors(history, &colors);
+    history_len = getHistoryLen(history);
+    if (history_len == 0 || history[history_len - 1].d[IDX_HINT_PLACE] != -1 || history[history_len - 1].d[IDX_HINT_COLOR] != -1) {
+        getPossiblePlayerShots(&colors, results);
+        for (i = 0; results->d[i].d[0]; i++)
+            results->d[i].d[IDX_SCORE] = check(history, results->d + i);
+        ret = filterShots(results->d, results->d, INT_MAX - 1);
+        return ret;
+    } else {
+        assert(0); // Not yet implemented
+        //masterPossibleShots_t results;
+        //getPossibleMasterShots(history + nb_hints, &results);
+        return ret;
+    }
+}
+
+int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], debug_t *dbg) {
+    colorlist_t colors;
+    int ret;
+    int i;
+    int history_len;
+
+    getUsedColors(history, &colors);
+    history_len = getHistoryLen(history);
+    if (history_len == 0 || history[history_len - 1].d[IDX_HINT_PLACE] != -1 || history[history_len - 1].d[IDX_HINT_COLOR] != -1) {
+        playerPossibleShots_t tmp;
+        ret = getMin(history, &colors, minMaxDepth, &tmp, dbg);
+        for (i = 0; tmp.d[i].d[0]; i++)
+            memcpy(results + i, tmp.d + i, sizeof(shot_t));
+        return ret;
+    } else {
+        masterPossibleShots_t tmp;
+        ret = getMax(history, &colors, minMaxDepth, &tmp, dbg);
+        for (i = 0; tmp.d[i].d[0]; i++)
+            memcpy(results + i, tmp.d + i, sizeof(shot_t));
+        return ret;
+    }
+}
+
