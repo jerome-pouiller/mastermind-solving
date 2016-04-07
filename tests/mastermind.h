@@ -57,8 +57,12 @@ typedef struct {
     shot_t d[NB_POSS_MASTER + 1];
 } masterPossibleShots_t;
 
-typedef struct {
-} debug_t;
+typedef struct debug debug_t;
+struct debug {
+    void (*onMin)(shot_t results[], int min, debug_t *dbg);
+    void (*onMax)(shot_t results[], int max, debug_t *dbg);
+    void *privat;
+};
 
 // Helper to initialise shot_t, Exemple:
 // shot_t s = S(A, B, C, D, 0, 1);
