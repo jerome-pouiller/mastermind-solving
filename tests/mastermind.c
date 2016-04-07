@@ -113,13 +113,13 @@ int getUsedColors(shot_t history[], colorlist_t *colors) {
     return nb;
 }
 
-
 int filterShots(shot_t out[], shot_t in[], int score) {
     int i, j = 0;
 
     for (i = 0; in[i].d[0]; i++)
         if (in[i].d[IDX_SCORE] <= score) {
-            memcpy(out + j, in + i, sizeof(shot_t));
+            // memmove is a no-op if out + j == in + i
+            memmove(out + j, in + i, sizeof(shot_t));
             j++;
         }
     out[j].d[0] = 0;
