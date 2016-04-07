@@ -201,6 +201,7 @@ static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *pattern, shot_t 
             jocker = colors->d[i] + 1;
     }
     colors_len = i;
+    colors->d[colors_len] = 0;
 
     for (i = 0; i < colors_len + 1; i++) {
         if (i < NB_COLORS) {
