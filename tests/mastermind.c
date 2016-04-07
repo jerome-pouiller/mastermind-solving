@@ -82,7 +82,7 @@ static int _computeSymetries(shot_t *shot, char lst_jocker, int nb_unknown) {
 
 int computeSymetries(shot_t shots[], colorlist_t *colors) {
     int total = 0;
-    int i, j;
+    int i;
     int nb_unknown;
     char lst_jocker = JOCKER_OFFSET - 1;
 
