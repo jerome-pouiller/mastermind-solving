@@ -363,16 +363,18 @@ int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], debug_t *db
     getUsedColors(history, &colors);
     history_len = getHistoryLen(history);
     if (history_len == 0 || history[history_len - 1].d[IDX_HINT_PLACE] != -1 || history[history_len - 1].d[IDX_HINT_COLOR] != -1) {
-        playerPossibleShots_t tmp;
+        playerPossibleShots_t tmp = S();
         ret = getMin(history, &colors, minMaxDepth, &tmp, dbg);
         for (i = 0; tmp.d[i].d[0]; i++)
             memcpy(results + i, tmp.d + i, sizeof(shot_t));
+        results[i].d[0] = 0;
         return ret;
     } else {
-        masterPossibleShots_t tmp;
+        masterPossibleShots_t tmp = S();
         ret = getMax(history, &colors, minMaxDepth, &tmp, dbg);
         for (i = 0; tmp.d[i].d[0]; i++)
             memcpy(results + i, tmp.d + i, sizeof(shot_t));
+        results[i].d[0] = 0;
         return ret;
     }
 }
