@@ -105,7 +105,7 @@ int getPossibleGameShots(shot_t history[], playerPossibleShots_t *results);
  * best score. dbg contains functions that are called during step of algorithm.
  * Use it to print/collect internal information.
  */
-int getBestShot(shot_t history[], int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg);
+int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], debug_t *dbg);
 
 /*
  * From a shot list, return number of entries (without taking account jockers)
