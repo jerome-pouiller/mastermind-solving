@@ -21,15 +21,16 @@
 
 // Number of extra places in shot_t
 #define NB_EXTRA         2
-// Index number of symetry in this shot (should be 0 if there is no jocker).
+// Index number of symetry in this shot (should be 1 if there is no jocker).
 //  0 means uninitialized
 #define IDX_NUM_SYM      (NB_PLACES + NB_HINTS + 0)
-// Index of score (=number of possibilityes for player/master after this shot).
-// ?? means unitialized
-// ?? means shot is possible, but we don't known the score
-// -1 means this shot is not possible
+// Index of score (= number of possibilities for player/master after this shot).
+// Note we also store if shot is valid or not.
+// -1 means unitialized
+//  0 means shot is possible, but we don't (yet) know the score
 //  0 means we garantee this shot to be correct
 //  1 means we garantee this shot or next one will be correct
+// INT_MAX means this shot is not possible
 #define IDX_SCORE        (NB_PLACES + NB_HINTS + 1)
 
 // Number of possible shots for player (used to store results)
@@ -129,13 +130,13 @@ int computeSymetries(shot_t shots[], colorlist_t *colors);
 
 /*
  * Filter results to only keep results with a score higher then score. Return
- * number of results.
+ * number of results. Arrays out and in can be the same.
  */
 int filterShots(shot_t out[], shot_t in[], int score);
 
 /*
  * Pretty print result with a score high then score. Return number of printed
- * results.
+ * results (same than getNumShots()).
  */
 int prShots(shot_t shots[], int score);
 
