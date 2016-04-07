@@ -17,9 +17,8 @@ init_and_print: init_and_print.o libmastermind.a
 libmastermind.a: mastermind.o
 	$(AR) $(ARFLAGS) $@ $<
 
-libmastermind.so: LDFLAGS=-shared
 libmastermind.so: mastermind_shared.o
-	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
+	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -shared -o $@
 
 -include bestMasterShot.d
 -include bestPlayerShot.d
