@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 
 #define DEBUG
 
@@ -141,7 +142,7 @@ static int checkone(const shot_t *hint, const shot_t *prop) {
             count++;
         }
     if (count != hint->d[IDX_HINT_PLACE])
-        return -1;
+        return INT_MAX;
     count = 0;
     for (i = 0; i < NB_PLACES; i++)
         if (!(used[i] & 1))
@@ -152,19 +153,19 @@ static int checkone(const shot_t *hint, const shot_t *prop) {
                     count++;
                 }
     if (count != hint->d[IDX_HINT_COLOR])
-        return -1;
+        return INT_MAX;
 
     return 0;
 }
 
 /**
- * Check if a proposition is valid compared to multiple hints
+ * Check if a shot (for player) is valid compared to multiple hints
  */
 static int check(shot_t hints[], const shot_t *prop) {
     int i;
     for (i = 0; hints[i].d[0]; i++)
-        if (checkone(hints + i, prop) == -1)
-            return -1;
+        if (checkone(hints + i, prop) == INT_MAX)
+            return INT_MAX;
     return 0;
 }
 
