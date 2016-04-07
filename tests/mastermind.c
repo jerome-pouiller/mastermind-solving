@@ -100,6 +100,7 @@ int computeSymetries(shot_t shots[], colorlist_t *colors) {
 int getUsedColors(shot_t history[], colorlist_t *colors) {
     int i, j, k;
     int nb = 0;
+
     memset(colors, 0, sizeof(*colors));
     for (i = 0; history[i].d[0]; i++) {
         for (j = 0; j < NB_PLACES; j++) {
