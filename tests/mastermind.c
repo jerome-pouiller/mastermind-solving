@@ -282,7 +282,7 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
             if (results->d[i].d[IDX_SCORE] != INT_MAX) {
                 colorlist_t colors_local;
                 masterPossibleShots_t local = { };
-                memcpy(history + history_len, results + i, sizeof(shot_t));
+                memcpy(history + history_len, results->d + i, sizeof(shot_t));
                 memcpy(&colors_local, colors, sizeof(colors_local));
                 for (j = 0; results->d[i].d[j]; j++) {
                     for (k = 0; colors_local.d[k] && results->d[i].d[j] != colors_local.d[k]; k++)
