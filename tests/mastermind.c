@@ -263,6 +263,8 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
     int min;
 
     history_len = getHistoryLen(history);
+    history[history_len + 1].d[0] = 0;
+
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
         results->d[i].d[IDX_SCORE] = check(history, results->d + i);
