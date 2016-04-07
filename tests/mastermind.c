@@ -182,7 +182,7 @@ static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *results, shot_t 
     int total = 0;
     int i;
 
-    for (i = 0; pattern->d[i]; i++)
+    for (i = 0; pattern->d[i] && i < NB_PLACES; i++)
         ;
     pattern_len = i;
 
@@ -215,12 +215,17 @@ static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *results, shot_t 
 
 int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results) {
     shot_t pattern = S();
+    pattern.d[IDX_HINT_PLACE] = -1;
+    pattern.d[IDX_HINT_COLOR] = -1;
     return _getPossiblePlayerShots(colors, results->d, &pattern);
 }
 
 int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results) {
     int i = 0;
     int placed, colors;
+
+    assert(currentShot->d[IDX_HINT_PLACE] == -1); // Should not be initialized
+    assert(currentShot->d[IDX_HINT_COLOR] == -1); // Should not be initialized
     for (placed = 0; placed <= NB_PLACES; placed++) {
         for (colors = 0; colors + placed <= NB_PLACES; colors++) {
             if (! (placed == NB_PLACES - 1 && colors == 1)) {
