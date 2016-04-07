@@ -7,8 +7,10 @@
 CFLAGS += -Wall
 PREFIX = /usr/local
 
-all: compute_symetry init_and_print libmastermind.so
+all: compute_symetry init_and_print bestMasterShot bestPlayerShot libmastermind.so
 
+bestMasterShot: bestMasterShot.o libmastermind.a
+bestPlayerShot: bestPlayerShot.o libmastermind.a
 compute_symetry: compute_symetry.o libmastermind.a
 init_and_print: init_and_print.o libmastermind.a
 
@@ -19,6 +21,8 @@ libmastermind.so: LDFLAGS=-shared
 libmastermind.so: mastermind_shared.o
 	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
+-include bestMasterShot.d
+-include bestPlayerShot.d
 -include init_and_print.d
 -include compute_symetry.d
 -include mastermind.d
