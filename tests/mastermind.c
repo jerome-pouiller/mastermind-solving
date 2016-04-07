@@ -311,6 +311,7 @@ int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibl
 
     assert(minMaxDepth >= 0);
     history_len = getHistoryLen(history) - 1;
+    history[history_len + 1].d[0] = 0;
     assert(history_len >= 0); // It make no mean for master to play first.
 
     // Note: it is difficult to filter impossible shots here nor compute score
@@ -318,7 +319,6 @@ int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibl
     // can't just return results in getMax().
     getPossibleMasterShots(history + history_len, results);
 
-    history[history_len + 1].d[0] = 0;
     for (i = 0; results->d[i].d[0]; i++) {
         playerPossibleShots_t local = { };
         memcpy(history + history_len, results->d + i, sizeof(shot_t));
