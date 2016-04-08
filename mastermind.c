@@ -292,12 +292,13 @@ int getmin(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
         printf("%d ", depth);
         for (i = 0; i < debug_parm->initial_depth - depth; i++)
             printf("    ");
-        printf("Got min=%d", min);
+        printf("Got min=%d ", min);
         if (num_poss == 1)
             printf(" (solved)");
         if (min == 0)
             printf(" (no-solutions)");
-        printf("\n");
+        printf(" for ");
+        pr_prop(hints[nb_hints - 1]);
         if (debug_parm->details <= depth)
             pr_proplist(results, min);
     }
@@ -327,15 +328,16 @@ int getmax(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
         if (results[i][IDX_NUM_POSS] > max)
             max = results[i][IDX_NUM_POSS];
     }
-    hints[nb_hints][0] = 0;
     if (debug_parm && debug_parm->debug_depth <= depth) {
         printf("%d ", depth);
         for (i = 0; i < debug_parm->initial_depth - depth; i++)
             printf("    ");
-        printf("  Got max=%d\n", max);
+        printf("  Got max=%d for ", max);
+        pr_prop(hints[nb_hints]);
         if (debug_parm->details <= depth)
             pr_proplist(results, max);
     }
+    hints[nb_hints][0] = 0;
     return max;
 }
 
