@@ -87,6 +87,9 @@ int getUsedColors(shot_t history[], colorlist_t *colors);
 /*
  * Get list of possible shots for player with given colorlist. Use jocker for
  * not yet used colors.
+ * 'colors' is list of already used colors (if # of already used colors ==
+ * NB_COLORS, no jocker are used).
+ *
  */
 int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results);
 
@@ -102,7 +105,7 @@ int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results);
  * contains hint (ie. { '0', '0', '1', '2', -1, -1 }), return possible shots
  * from master.
  */
-int getPossibleGameShots(shot_t history[], playerPossibleShots_t *results);
+int getPossibleGameShots(shot_t history[], shot_t results[]);
 
 /*
  * Get best shots given an history. If last entry of entry do not contains hint

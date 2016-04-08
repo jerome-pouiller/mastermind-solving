@@ -342,29 +342,6 @@ static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, master
     return max;
 }
 
-// Same than getPossiblePlayerShots, but filter out impossile shots
-int getPossibleGameShots(shot_t history[], playerPossibleShots_t *results) {
-    int i;
-    int ret;
-    int history_len;
-    colorlist_t colors;
-
-    getUsedColors(history, &colors);
-    history_len = getHistoryLen(history);
-    if (history_len == 0 || history[history_len - 1].d[IDX_HINT_PLACE] != -1 || history[history_len - 1].d[IDX_HINT_COLOR] != -1) {
-        getPossiblePlayerShots(&colors, results);
-        for (i = 0; results->d[i].d[0]; i++)
-            results->d[i].d[IDX_SCORE] = check(history, results->d + i);
-        ret = filterShots(results->d, results->d, '>', INT_MAX - 1);
-        return ret;
-    } else {
-        assert(0); // Not yet implemented
-        //masterPossibleShots_t results;
-        //getPossibleMasterShots(history + nb_hints, &results);
-        return ret;
-    }
-}
-
 int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], debug_t *dbg) {
     colorlist_t colors;
     int ret;
@@ -393,4 +370,10 @@ int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], debug_t *db
         return ret;
     }
 }
+
+int getPossibleGameShots(shot_t history[], shot_t results[]) {
+    getBestShot(history, 0, results, NULL);
+    return getHistoryLen(results);
+}
+
 
