@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "mastermind.h"
 
-static const int minMaxDepth = 1;
+static const int minMaxDepth = 0;
 
 int main(int argc, char **argv) {
     int ret;
