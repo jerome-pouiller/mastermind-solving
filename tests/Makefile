@@ -7,8 +7,9 @@
 CFLAGS += -Wall
 PREFIX = /usr/local
 
-all: compute_symetry init_and_print bestMasterShot bestPlayerShot libmastermind.so
+all: compute_symetry init_and_print bestMasterShot bestPlayerShot paramMasterLevel libmastermind.so
 
+paramMasterLevel: paramMasterLevel.o libmastermind.a
 bestMasterShot: bestMasterShot.o libmastermind.a
 bestPlayerShot: bestPlayerShot.o libmastermind.a
 compute_symetry: compute_symetry.o libmastermind.a
@@ -20,6 +21,7 @@ libmastermind.a: mastermind.o
 libmastermind.so: mastermind_shared.o
 	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -shared -o $@
 
+-include paramMasterLevel.d
 -include bestMasterShot.d
 -include bestPlayerShot.d
 -include init_and_print.d
@@ -37,7 +39,7 @@ clean:
 	$(RM) *.o *.d
 
 distclean: clean
-	$(RM) compute_symetry init_and_print libmastermind.so libmastermind.a bestMasterShot bestPlayerShot
+	$(RM) compute_symetry init_and_print libmastermind.so libmastermind.a bestMasterShot bestPlayerShot paramMasterLevel
 
 install:
 	install -m 755 -d $(DESTDIR)$(PREFIX)/lib
