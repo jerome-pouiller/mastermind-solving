@@ -59,9 +59,9 @@ typedef struct {
 
 typedef struct debug debug_t;
 struct debug {
-    void (*onMin)(shot_t results[], int min, debug_t *dbg);
-    void (*onMax)(shot_t results[], int max, debug_t *dbg);
-    void *privat;
+    void (*onMin)(playerPossibleShots_t *shots, int min, int depth, debug_t *dbg);
+    void (*onMax)(masterPossibleShots_t *shots, int max, int depth, debug_t *dbg);
+    void *priv;
 };
 
 // Helper to initialise shot_t, Exemple:

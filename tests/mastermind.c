@@ -328,7 +328,7 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
         history[history_len].d[0] = 0;
     }
     if (dbg && dbg->onMin)
-        dbg->onMin(results->d, min, dbg);
+        dbg->onMin(results, min, minMaxDepth, dbg);
     return min;
 }
 
@@ -355,7 +355,7 @@ int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibl
             max = results->d[i].d[IDX_SCORE];
     }
     if (dbg && dbg->onMax)
-        dbg->onMax(results->d, max, dbg);
+        dbg->onMax(results, max, minMaxDepth, dbg);
     return max;
 }
 
