@@ -162,11 +162,7 @@ int filterShots(shot_t out[], shot_t in[], char op, int score) {
     return j;
 }
 
-/**
- * Check if a shot (for player) is valid compared to one hint. This function
- * does not exist for master since it does really make sense.
- */
-static int checkone(const shot_t *hint, const shot_t *prop) {
+int checkOne(const shot_t *hint, const shot_t *prop) {
     int i, j;
     int count;
     int used[NB_PLACES] = { 0 };
@@ -194,25 +190,14 @@ static int checkone(const shot_t *hint, const shot_t *prop) {
     return 0;
 }
 
-/**
- * Check if a shot (for player) is valid compared to multiple hints
- */
-static int check(shot_t hints[], const shot_t *prop) {
+int check(shot_t hints[], const shot_t *prop) {
     int i;
     for (i = 0; hints[i].d[0]; i++)
-        if (checkone(hints + i, prop) == INT_MAX)
+        if (checkOne(hints + i, prop) == INT_MAX)
             return INT_MAX;
     return 0;
 }
 
-
-/*
- * Generate a list of possibilities.
- *  - possibilities must be big enough (pow(NB_COLORs, NB_PLACES))
- *  - colors is set of already used colors (if num of already used colors is == NB_COLORS, no jocker are used)
- *  - pattern is used internally. It must be filled with zeros
- * Return number of possibilities generated
- */
 static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *pattern, shot_t results[]) {
     int jocker = JOCKER_OFFSET;
     int pattern_len, colors_len;
@@ -280,15 +265,14 @@ int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results) 
     return i;
 }
 
-int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, debug_t *dbg);
-int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg);
+static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, debug_t *dbg);
+static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg);
 
-int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg) {
+static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, debug_t *dbg) {
     int num_poss;
     int i, j, k;
     int history_len;
     int min;
-
 
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
@@ -332,17 +316,16 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
     return min;
 }
 
-int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, debug_t *dbg) {
+static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, debug_t *dbg) {
     int max = 0;
     int history_len;
     int i;
 
-    assert(minMaxDepth >= 0);
     history_len = getHistoryLen(history) - 1;
     assert(history_len >= 0); // It make no mean for master to play first.
 
     // Note: it is difficult to filter impossible shots here nor compute score
-    // here. It is easier to ask to getMin to do the job. Consequently, we 
+    // here. It is easier to ask to getMin to do the job. Consequently, we
     // can't just return results in getMax().
     getPossibleMasterShots(history + history_len, results);
 

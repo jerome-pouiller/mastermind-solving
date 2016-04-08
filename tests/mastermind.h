@@ -149,5 +149,17 @@ int prShots(shot_t shots[], char op, int score);
  */
 void prShot(const shot_t shot);
 
+/**
+ * Check if a shot (for player) is valid compared to one hint. This function
+ * does not exist for master since it does really make sense. Return INT_MAX or 0.
+ */
+int checkOne(const shot_t *hint, const shot_t *prop);
+
+/**
+ * Check if a shot (for player) is valid compared to multiple hints
+ */
+int check(shot_t hints[], const shot_t *prop);
+
+
 #endif /* MASTERMIND_H */
 
