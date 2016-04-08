@@ -41,11 +41,12 @@ struct debug_parm {
      int debug_depth;
      int details;
 };
-
 void pr_prop(const shot_t prop);
 int pr_proplist(shot_t props[], int score);
-int getmax(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, shot_t results[NB_POSS_MASTER]);
+/* Return best shot to play for player */
 int getmin(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, shot_t results[NB_POSS_PLAYER]);
+/* Return best shot to play for master */
+int getmax(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debug_parm, shot_t results[NB_POSS_MASTER]);
 
 /* Return an array of playing possibilities for player.
  * If colors list does not contains all colors, jockers are used (and number of
