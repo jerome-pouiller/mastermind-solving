@@ -289,8 +289,6 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
     int history_len;
     int min;
 
-    history_len = getHistoryLen(history);
-    history[history_len + 1].d[0] = 0;
 
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
@@ -305,13 +303,15 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
         min = num_poss;
     } else {
         min = INT_MAX;
+        history_len = getHistoryLen(history);
+        history[history_len + 1].d[0] = 0;
         for (i = 0; results->d[i].d[0]; i++) {
             if (results->d[i].d[IDX_SCORE] != INT_MAX) {
                 colorlist_t colors_local;
                 masterPossibleShots_t local = { };
                 memcpy(history + history_len, results->d + i, sizeof(shot_t));
                 memcpy(&colors_local, colors, sizeof(colors_local));
-                for (j = 0; results->d[i].d[j]; j++) {
+                for (j = 0; results->d[i].d[j] && j < NB_PLACES; j++) {
                     for (k = 0; colors_local.d[k] && results->d[i].d[j] != colors_local.d[k]; k++)
                         ;
                     if (!colors_local.d[k]) {
@@ -325,6 +325,7 @@ int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibl
                     min = results->d[i].d[IDX_SCORE];
             }
         }
+        history[history_len].d[0] = 0;
     }
     if (dbg && dbg->onMin)
         dbg->onMin(results->d, min, dbg);
@@ -338,7 +339,6 @@ int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibl
 
     assert(minMaxDepth >= 0);
     history_len = getHistoryLen(history) - 1;
-    history[history_len + 1].d[0] = 0;
     assert(history_len >= 0); // It make no mean for master to play first.
 
     // Note: it is difficult to filter impossible shots here nor compute score
@@ -346,6 +346,7 @@ int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibl
     // can't just return results in getMax().
     getPossibleMasterShots(history + history_len, results);
 
+    history[history_len + 1].d[0] = 0;
     for (i = 0; results->d[i].d[0]; i++) {
         playerPossibleShots_t local = { };
         memcpy(history + history_len, results->d + i, sizeof(shot_t));
