@@ -37,14 +37,11 @@ clean:
 	$(RM) *.o *.d
 
 distclean: clean
-	$(RM) compute_symetry init_and_print libmastermind.so libmastermind.a
+	$(RM) compute_symetry init_and_print libmastermind.so libmastermind.a bestMasterShot bestPlayerShot
 
 install:
 	install -m 755 -d $(DESTDIR)$(PREFIX)/lib
 	install -m 644 libmastermind.a $(DESTDIR)$(PREFIX)/lib
 	install -m 644 libmastermind.so $(DESTDIR)$(PREFIX)/lib
-	install -m 755 -d $(DESTDIR)$(PREFIX)/bin
-	install -m 755 compute_symetry $(DESTDIR)$(PREFIX)/bin
-	install -m 755 init_and_print $(DESTDIR)$(PREFIX)/bin
 
 
