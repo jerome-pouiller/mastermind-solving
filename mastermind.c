@@ -341,9 +341,12 @@ int getmax(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
     return max;
 }
 
-hint_t history[] = {
-    //{ B, B, B, B, 1, 0 },
-    //{ A, A, A, A, 2, 0 },
+shot_t history[] = {
+    //{ A, A, A, C, 3, 0 },
+    //{ A, A, A, B, 3, 0 },
+    { '0', '0', '1', '2', 0, 0 },
+    //{ A, B, C, C, 0, 2 },
+    //{ A, D, A, C, 0, 1 },
     { 0 },
     { 0 },
     { 0 },
@@ -357,10 +360,12 @@ hint_t history[] = {
 };
 
 int main(int argc, char **argv) {
-    colorlist_t colors = { A, B, C, D, E, F, 0 };
+    //colorlist_t colors = { };
+    colorlist_t colors = { '0', '1', '2' };
+    //colorlist_t colors = { A, B, C, D, E, F, 0 };
     struct debug_parm debug_parm = {
-        .debug_depth = 1,
-        .details = 2
+        .debug_depth = 0,
+        .details = 0
     };
     shot_t results[NB_POSS_PLAYER];
     int num = generate_player(colors, results);
@@ -370,7 +375,8 @@ int main(int argc, char **argv) {
     //pr_proplist(results, -1);
     printf("%d possibilities\n", num);
 
-    ret = getmin(history, colors, 2, &debug_parm, results);
+    ret = getmin(history, colors, 1, &debug_parm, results);
+    //ret = getmax(history, colors, 2, &debug_parm, results);
     printf("Best score : %d\n", ret);
     //ret = pr_proplist(results, ret);
     printf("Num best scores : %d\n", ret);
