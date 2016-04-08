@@ -253,6 +253,11 @@ int getmin(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
     if (debug_parm && debug_parm->initial_depth == 0)
         debug_parm->initial_depth = depth;
 
+    int nb_hints;
+    for (i = 0; hints[i][0]; i++)
+        ;
+    nb_hints = i;
+
     generate_player(colors, results);
     num_poss = mark(hints, results, colors);
     if (num_poss == 0) {
@@ -263,10 +268,6 @@ int getmin(shot_t *hints, colorlist_t colors, int depth, struct debug_parm *debu
                 results[i][IDX_NUM_POSS] = num_poss;
         min = num_poss;
     } else {
-        int nb_hints;
-        for (i = 0; hints[i][0]; i++)
-            ;
-        nb_hints = i;
         min = INT_MAX;
         for (i = 0; results[i][0]; i++) {
             if (results[i][IDX_NUM_POSS] != -1) {
