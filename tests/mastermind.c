@@ -151,9 +151,11 @@ int filterShots(shot_t out[], shot_t in[], char op, int score) {
                 j++;
             }
     } else if (op == 0 || op == ' ') { // No-op
-        for (i = 0; in[i].d[0]; i++) {
-            memmove(out + j, in + i, sizeof(shot_t));
-            j++;
+        if (in != out) {
+            for (i = 0; in[i].d[0]; i++) {
+                memmove(out + j, in + i, sizeof(shot_t));
+                j++;
+            }
         }
     } else {
         assert(0); // Bad operator
