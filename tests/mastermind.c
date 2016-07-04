@@ -29,7 +29,11 @@ void prShot(const shot_t shot) {
         printf("%c", shot.d[i]);
     printf(" ");
     for (; i < NB_PLACES + NB_HINTS; i++)
-        printf("%d", shot.d[i]);
+        if (shot.d[i] == -1)
+            printf("-");
+        else
+            printf("%d", shot.d[i]);
+
 #ifdef DEBUG
     printf(" sym: %3d", shot.d[IDX_NUM_SYM]);
     printf(" scor: %3d", shot.d[IDX_SCORE]);
