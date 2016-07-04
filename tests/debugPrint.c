@@ -79,8 +79,7 @@ void *dbg_inMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPo
 
 void dbg_outMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, int max, void *priv, void *dbg_local) {
     indent(0, minMaxDepth);
-    printf("}");
-    printf(" -> max: %d\n", max);
+    printf("} -> max: %d\n", max);
 }
 
 debug_t debugPrint = {
