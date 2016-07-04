@@ -58,12 +58,17 @@ typedef struct {
     shot_t d[NB_POSS_MASTER + 1];
 } masterPossibleShots_t;
 
-typedef struct debug debug_t;
-struct debug {
-    void (*onMin)(playerPossibleShots_t *shots, int min, int depth, debug_t *dbg);
-    void (*onMax)(masterPossibleShots_t *shots, int max, int depth, debug_t *dbg);
+typedef struct debug {
     void *priv;
-};
+    void (*start)(shot_t history[], colorlist_t *colors, int initialDepth, int isMasterSearch, void *priv);
+    void (*end)(shot_t history[], colorlist_t *colors, int initialDepth, shot_t results[], int score, int isMasterSearch, void *priv);
+    // Value returned is passed to subsecquent calls to inMax and call to outMin
+    void *(*inMin)(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, void *priv, void *dbg_local);
+    void (*outMin)(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, int min, void *priv, void *dbg_local);
+    // Value returned is passed to subsecquent calls to inMin and call to outMax
+    void *(*inMax)(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, void *priv, void *dbg_local);
+    void (*outMax)(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, int max, void *priv, void *dbg_local);
+} debug_t;
 
 // Helper to initialise shot_t, Exemple:
 // shot_t s = S(A, B, C, D, 0, 1);
@@ -114,7 +119,7 @@ int getPossibleGameShots(shot_t history[], shot_t results[]);
  * best score. dbg contains functions that are called during step of algorithm.
  * Use it to print/collect internal information.
  */
-int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], debug_t *dbg);
+int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], const debug_t *dbg);
 
 /*
  * From a shot list, return number of entries (without taking account jockers)
