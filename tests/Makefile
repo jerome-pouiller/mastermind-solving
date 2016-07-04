@@ -7,13 +7,13 @@
 CFLAGS += -Wall
 PREFIX = /usr/local
 
-all: compute_symetry init_and_print bestMasterShot bestPlayerShot paramMasterLevel libmastermind.so
+all: compute_symetry initAndPrint bestMasterShot bestPlayerShot paramMasterLevel libmastermind.so
 
 paramMasterLevel: paramMasterLevel.o libmastermind.a
 bestMasterShot: bestMasterShot.o libmastermind.a
 bestPlayerShot: bestPlayerShot.o libmastermind.a
 compute_symetry: compute_symetry.o libmastermind.a
-init_and_print: init_and_print.o libmastermind.a
+initAndPrint: initAndPrint.o libmastermind.a
 
 libmastermind.a: mastermind.o
 	$(AR) $(ARFLAGS) $@ $<
@@ -24,7 +24,7 @@ libmastermind.so: mastermind_shared.o
 -include paramMasterLevel.d
 -include bestMasterShot.d
 -include bestPlayerShot.d
--include init_and_print.d
+-include initAndPrint.d
 -include compute_symetry.d
 -include mastermind.d
 -include mastermind_shared.d
