@@ -271,22 +271,22 @@ int getPossibleMasterShots(shot_t *currentShot, masterPossibleShots_t *results) 
     return i;
 }
 
-static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, const debug_t *dbg, void *dbg_local);
-static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, const debug_t *dbg, void *dbg_local);
+static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, const debug_t *dbg, void *dbg_local, int sibling);
+static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, const debug_t *dbg, void *dbg_local, int sibling);
 
-static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, const debug_t *dbg, void *dbg_local) {
+static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, const debug_t *dbg, void *dbg_parent, int sibling) {
     int i, j, k;
     int num_poss;
     int history_len;
     int min;
-    void *dbg_ret = NULL;
+    void *dbg_local = NULL;
 
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
         results->d[i].d[IDX_SCORE] = check(history, results->d + i);
     filterShots(results->d, results->d, '>', INT_MAX - 1);
     if (dbg && dbg->inMin)
-        dbg_ret = dbg->inMin(history, colors, minMaxDepth, results, dbg->priv, dbg_local);
+        dbg_local = dbg->inMin(history, colors, minMaxDepth, results, dbg->priv, dbg_parent, sibling);
     num_poss = computeSymetries(results->d, colors);
     if (num_poss == 0) {
         min = INT_MAX;
@@ -312,7 +312,7 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
                         colors_local.d[k + 1] = 0;
                     }
                 }
-                results->d[i].d[IDX_SCORE] = getMax(history, &colors_local, minMaxDepth - 1, &local, dbg, dbg_ret);
+                results->d[i].d[IDX_SCORE] = getMax(history, &colors_local, minMaxDepth - 1, &local, dbg, dbg_local, i);
                 assert(results->d[i].d[IDX_SCORE] > 0);
                 if (results->d[i].d[IDX_SCORE] < min)
                     min = results->d[i].d[IDX_SCORE];
@@ -321,15 +321,15 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
         history[history_len].d[0] = 0;
     }
     if (dbg && dbg->outMin)
-        dbg->outMin(history, colors, minMaxDepth, results, min, dbg->priv, dbg_ret);
+        dbg->outMin(history, colors, minMaxDepth, results, min, dbg->priv, dbg_parent, dbg_local, sibling);
     return min;
 }
 
-static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, const debug_t *dbg, void *dbg_local) {
+static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, const debug_t *dbg, void *dbg_parent, int sibling) {
     int max = 0;
     int history_len;
     int i;
-    void *dbg_ret = NULL;
+    void *dbg_local = NULL;
 
     history_len = getHistoryLen(history) - 1;
     assert(history_len >= 0); // It make no mean for master to play first.
@@ -341,16 +341,16 @@ static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, master
 
     history[history_len + 1].d[0] = 0;
     if (dbg && dbg->inMax)
-        dbg_ret = dbg->inMax(history, colors, minMaxDepth, results, dbg->priv, dbg_local);
+        dbg_local = dbg->inMax(history, colors, minMaxDepth, results, dbg->priv, dbg_parent, sibling);
     for (i = 0; results->d[i].d[0]; i++) {
         playerPossibleShots_t local = { };
         memcpy(history + history_len, results->d + i, sizeof(shot_t));
-        results->d[i].d[IDX_SCORE] = getMin(history, colors, minMaxDepth, &local, dbg, dbg_ret);
+        results->d[i].d[IDX_SCORE] = getMin(history, colors, minMaxDepth, &local, dbg, dbg_local, i);
         if (results->d[i].d[IDX_SCORE] > max && results->d[i].d[IDX_SCORE] < INT_MAX)
             max = results->d[i].d[IDX_SCORE];
     }
     if (dbg && dbg->outMax)
-        dbg->outMax(history, colors, minMaxDepth, results, max, dbg->priv, dbg_ret);
+        dbg->outMax(history, colors, minMaxDepth, results, max, dbg->priv, dbg_parent, dbg_local, sibling);
     return max;
 }
 
@@ -359,6 +359,7 @@ int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], const debug
     int ret;
     int i;
     int history_len;
+    void *dbg_local = NULL;
 
     getUsedColors(history, &colors);
     for (i = 0; history[i].d[0]; i++) {
@@ -369,24 +370,24 @@ int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], const debug
     if (history_len == 0 || history[history_len - 1].d[IDX_HINT_PLACE] != -1 || history[history_len - 1].d[IDX_HINT_COLOR] != -1) {
         playerPossibleShots_t tmp = S();
         if (dbg && dbg->start)
-            dbg->start(history, &colors, minMaxDepth, 0, dbg->priv);
-        ret = getMin(history, &colors, minMaxDepth, &tmp, dbg, NULL);
+            dbg_local = dbg->start(history, &colors, minMaxDepth, 0, dbg->priv);
+        ret = getMin(history, &colors, minMaxDepth, &tmp, dbg, dbg_local, 0);
         for (i = 0; tmp.d[i].d[0]; i++)
             memcpy(results + i, tmp.d + i, sizeof(shot_t));
         results[i].d[0] = 0;
         if (dbg && dbg->end)
-            dbg->end(history, &colors, minMaxDepth, results, ret, 0, dbg->priv);
+            dbg->end(history, &colors, minMaxDepth, results, ret, 0, dbg->priv, dbg_local);
         return ret;
     } else {
         masterPossibleShots_t tmp = S();
         if (dbg && dbg->start)
-            dbg->start(history, &colors, minMaxDepth, 1, dbg->priv);
-        ret = getMax(history, &colors, minMaxDepth, &tmp, dbg, NULL);
+            dbg_local = dbg->start(history, &colors, minMaxDepth, 1, dbg->priv);
+        ret = getMax(history, &colors, minMaxDepth, &tmp, dbg, dbg_local, 0);
         for (i = 0; tmp.d[i].d[0]; i++)
             memcpy(results + i, tmp.d + i, sizeof(shot_t));
         results[i].d[0] = 0;
         if (dbg && dbg->end)
-            dbg->end(history, &colors, minMaxDepth, results, ret, 1, dbg->priv);
+            dbg->end(history, &colors, minMaxDepth, results, ret, 1, dbg->priv, dbg_local);
         return ret;
     }
 }
