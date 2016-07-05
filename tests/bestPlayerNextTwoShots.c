@@ -8,47 +8,42 @@
  * Given an history, return the best shot for player and for each possible master answer, return the best shot to play.
  * Exemple of output:
  *
- * 0012 -- (score: 222)
- *   0012 00 (score: 81)
- *     3333 -- (score: 81)
- *     3334 -- (score: 81)
- *     3343 -- (score: 81)
- *     3344 -- (score: 81)
- *     3345 -- (score: 81)
- *     3433 -- (score: 81)
- *     3434 -- (score: 81)
- *     3435 -- (score: 81)
- *     3443 -- (score: 81)
- *     3444 -- (score: 81)
- *     3445 -- (score: 81)
- *     3453 -- (score: 81)
- *     3454 -- (score: 81)
- *     3455 -- (score: 81)
- *   0012 01 (score: 222)
- *     1131 -- (score: 222)
- *     1133 -- (score: 222)
- *     1134 -- (score: 222)
- *     1331 -- (score: 222)
- *     1333 -- (score: 222)
- *     1334 -- (score: 222)
- *     1341 -- (score: 222)
- *     1343 -- (score: 222)
- *     1344 -- (score: 222)
- *     1345 -- (score: 222)
- *     2223 -- (score: 222)
- *     2233 -- (score: 222)
- *     2234 -- (score: 222)
- *     2323 -- (score: 222)
- *     2324 -- (score: 222)
- *     2333 -- (score: 222)
- *     2334 -- (score: 222)
- *     2343 -- (score: 222)
- *     2344 -- (score: 222)
- *     2345 -- (score: 222)
- *     3131 -- (score: 222)
- * [...]
- *
- */
+ * 0012 (score: 222)
+ *     00 (score: 81)
+ *         3333, 3334, 3343, 3344, 3345, 3433, 3434, 3435, 3443, 3444, 3445, 3453,
+ *     01 (score: 222)
+ *         1131, 1133, 1134, 1331, 1333, 1334, 1341, 1343, 1344, 1345, 2223, 2233, [...]
+ *     02 (score: 160)
+ *         1121, 1123, 1221, 1223, 1231, 1233, 1234, 1321, 1323, 1324, 2121, 2123, [...]
+ *     03 (score: 130)
+ *         1100, 1101, 1103, 1130, 1300, 1301, 1303, 1304, 1330, 1340, 2200, 2203, [...]
+ *     04 (score: 32)
+ *         1120, 1200, 1201, 1203, 1220, 1230, 1320, 2100, 2101, 2103, 2120,
+ *     10 (score: 182)
+ *         0333, 0334, 0343, 0344, 0345, 1111, 1113, 1311, 1313, 1314, 2222, 2232, [...]
+ *     11 (score: 198)
+ *         0131, 0133, 0134, 0223, 0233, 0234, 0300, 0303, 0304, 0323, 0324, 0330, [...]
+ *     12 (score: 98)
+ *         0100, 0101, 0103, 0121, 0123, 0130, 0200, 0203, 0220, 0221, 0230, 0231, [...]
+ *     13 (score: 22)
+ *         0120, 0201, 1020, 1102, 1202, 1210, 1302, 2001, 2102, 2110,
+ *     20 (score: 105)
+ *         0000, 0003, 0030, 0033, 0034, 0111, 0113, 0222, 0232, 0311, 0313, 0314, [...]
+ *     21 (score: 40)
+ *         0001, 0020, 0023, 0031, 0110, 0122, 0132, 0202, 0211, 0213, 0302,
+ *     22 (score: 5)
+ *         0021, 0102, 0210, 1002, 2010,
+ *     30 (score: 20)
+ *         0002, 0010, 0011, 0013, 0022, 0032, 0112, 0212, 0312, 1012, 2012, 3012,
+ *     40 (score: 1)
+ *         0012,
+ * 0102 (score: 222)
+ *     00 (score: 81)
+ *         3333, 3334, 3343, 3344, 3345, 3433, 3434, 3435, 3443, 3444, 3445,
+ *     01 (score: 222)
+ *         1311, 1313, 1314, 1331, 1333, 1334, 1341, 1343, 1344, 1345, 2223, 2233, [...]
+ * */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,17 +81,42 @@ void reccursive_free(struct dbg_shot *s) {
     free(s);
 };
 
-void reccursive_print(struct dbg_shot *in, int depth) {
+void dbg_prShot(const shot_t shot) {
     int i;
 
-    if (!in)
+    if (shot.d[NB_PLACES] == -1) {
+        for (i = 0; i < NB_PLACES; i++)
+            printf("%c", shot.d[i]);
+    } else {
+        for (i = NB_PLACES; i < NB_PLACES + NB_HINTS; i++)
+            printf("%d", shot.d[i]);
+    }
+}
+
+void reccursive_print(struct dbg_shot *in, int depth) {
+    int i, j;
+
+    if (!in || !in->subs_len)
         return;
-    for (i = 0; i < depth; i++)
-        printf("  ");
-    prShot(in->s);
-    printf(" (score: %d)\n", in->s.d[IDX_SCORE]);
-    for (i = 0; i < in->subs_len; i++)
-        reccursive_print(in->subs + i, depth + 1);
+    
+    if (in->subs[0].subs_len) {
+        for (i = 0; i < in->subs_len; i++) {
+            for (j = 0; j < depth; j++)
+                printf("    ");
+            dbg_prShot(in->subs[i].s);
+            printf(" (score: %d)\n", in->subs[i].s.d[IDX_SCORE]);
+            reccursive_print(in->subs + i, depth + 1);
+        }
+    } else {
+        for (j = 0; j < depth; j++)
+            printf("    ");
+        for (i = 0; i < in->subs_len; i++) {
+            dbg_prShot(in->subs[i].s);
+            printf(", ");
+            assert(!in->subs[i].subs_len);
+        }
+        printf("\n");
+    }
 }
 
 void *dbg_start(shot_t history[], colorlist_t *colors, int depth, int masterSearch, void *priv) {
@@ -108,10 +128,8 @@ void *dbg_start(shot_t history[], colorlist_t *colors, int depth, int masterSear
 
 void dbg_end(shot_t history[], colorlist_t *colors, int depth, shot_t results[], int score, int isMasterSearch, void *priv, void *dbg_local) {
     struct dbg_shot *local = (struct dbg_shot *) dbg_local;
-    int i;
 
-    for (i = 0; i < local->subs_len; i++)
-        reccursive_print(local->subs + i, 0);
+    reccursive_print(local, 0);
 }
 
 void *dbg_inMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, void *priv, void *dbg_parent, int sibling) {
