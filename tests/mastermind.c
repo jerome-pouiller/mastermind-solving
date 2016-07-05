@@ -287,6 +287,7 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
     // We hypothesize it is useless to play a shot we are sure to be wrong. So
     // we early prune these cases. However, you may argue this shot could give
     // some usefull information. If you don't want to prune them, comment next line
+    // FIXME: Commenting this line seems not to be sufficient
 #if 1
     filterShots(results->d, results->d, '>', INT_MAX - 1);
 #endif
