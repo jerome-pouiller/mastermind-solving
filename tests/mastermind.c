@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <limits.h>
 
-#define DEBUG
+//#define DEBUG
 
 static int getHistoryLen(shot_t shots[]) {
     int i;
