@@ -284,12 +284,17 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
         results->d[i].d[IDX_SCORE] = check(history, results->d + i);
+    // We hypothesize it is useless to play a shot we are sure to be wrong. So
+    // we early prune these cases. However, you may argue this shot could give
+    // some usefull information. If you don't want to prune them, comment next line
+#if 1
     filterShots(results->d, results->d, '>', INT_MAX - 1);
+#endif
     if (dbg && dbg->inMin)
         dbg_local = dbg->inMin(history, colors, minMaxDepth, results, dbg->priv, dbg_parent, sibling);
     num_poss = computeSymetries(results->d, colors);
     if (num_poss == 0) {
-        min = INT_MAX;
+        min = INT_MAX; // Throw an assert?
     } else if (!minMaxDepth || num_poss == 1) {
         for (i = 0; results->d[i].d[0]; i++)
             results->d[i].d[IDX_SCORE] = num_poss;
