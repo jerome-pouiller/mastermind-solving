@@ -60,14 +60,14 @@ typedef struct {
 
 typedef struct debug {
     void *priv;
-    void (*start)(shot_t history[], colorlist_t *colors, int initialDepth, int isMasterSearch, void *priv);
-    void (*end)(shot_t history[], colorlist_t *colors, int initialDepth, shot_t results[], int score, int isMasterSearch, void *priv);
+    void *(*start)(shot_t history[], colorlist_t *colors, int initialDepth, int isMasterSearch, void *priv);
+    void (*end)(shot_t history[], colorlist_t *colors, int initialDepth, shot_t results[], int score, int isMasterSearch, void *priv, void *dbg_local);
     // Value returned is passed to subsecquent calls to inMax and call to outMin
-    void *(*inMin)(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, void *priv, void *dbg_local);
-    void (*outMin)(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, int min, void *priv, void *dbg_local);
+    void *(*inMin)(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, void *priv, void *dbg_parent, int sibling);
+    void (*outMin)(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, int min, void *priv, void *dbg_parent, void *dbg_local, int sibling);
     // Value returned is passed to subsecquent calls to inMin and call to outMax
-    void *(*inMax)(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, void *priv, void *dbg_local);
-    void (*outMax)(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, int max, void *priv, void *dbg_local);
+    void *(*inMax)(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, void *priv, void *dbg_parent, int sibling);
+    void (*outMax)(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, int max, void *priv, void *dbg_parent, void *dbg_local, int sibling);
 } debug_t;
 
 // Helper to initialise shot_t, Exemple:

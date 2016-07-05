@@ -26,7 +26,7 @@ void indent(int isMin, int depth) {
         printf("    ");
 }
 
-void dbg_start(shot_t history[], colorlist_t *colors, int depth, int masterSearch, void *priv) {
+void *dbg_start(shot_t history[], colorlist_t *colors, int depth, int masterSearch, void *priv) {
     initialDepth = depth;
     isMasterSearch = masterSearch;
     printf("Given this history:\n");
@@ -36,9 +36,10 @@ void dbg_start(shot_t history[], colorlist_t *colors, int depth, int masterSearc
     } else {
         printf("Looking for the best player shot in %d depth\n", initialDepth);
     }
+    return NULL;
 }
 
-void dbg_end(shot_t history[], colorlist_t *colors, int depth, shot_t results[], int score, int isMasterSearch, void *priv) {
+void dbg_end(shot_t history[], colorlist_t *colors, int depth, shot_t results[], int score, int isMasterSearch, void *priv, void *dbg_local) {
     printf("Final: Best score: %d\n", score);
     if (isMasterSearch) {
         printf("Final: Number of best scores: %d (real: %d):\n", getNumShots(results, '<', score), getNumRealShots(results, '<', score));
@@ -51,7 +52,7 @@ void dbg_end(shot_t history[], colorlist_t *colors, int depth, shot_t results[],
     prShots(results, 0, 0);
 }
 
-void *dbg_inMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, void *priv, void *dbg_local) {
+void *dbg_inMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, void *priv, void *dbg_parent, int sibling) {
     indent(1, minMaxDepth);
     prShot(history[getNumShots(history, 0, 0) - 1]);
     if (minMaxDepth)
@@ -59,7 +60,7 @@ void *dbg_inMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPo
     return NULL;
 }
 
-void dbg_outMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, int min, void *priv, void *dbg_local) {
+void dbg_outMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, int min, void *priv, void *dbg_parent, void *dbg_local, int sibling) {
     if (minMaxDepth) {
         indent(1, minMaxDepth);
         printf("}");
@@ -70,14 +71,14 @@ void dbg_outMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPo
         printf(" -> impossible\n");
 }
 
-void *dbg_inMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, void *priv, void *dbg_local) {
+void *dbg_inMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, void *priv, void *dbg_parent, int sibling) {
     indent(0, minMaxDepth);
     prShot(history[getNumShots(history, 0, 0) - 1]);
     printf(" {\n");
     return NULL;
 }
 
-void dbg_outMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, int max, void *priv, void *dbg_local) {
+void dbg_outMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, int max, void *priv, void *dbg_parent, void * dbg_local, int sibling) {
     indent(0, minMaxDepth);
     printf("} -> max: %d\n", max);
 }
