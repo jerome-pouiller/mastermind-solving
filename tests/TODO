@@ -1,0 +1,10 @@
+
+* There is a bug in bestPlayerEnd
+* Convert to OpenMP (only first loop)
+* Make bestPlayerNextTwoShots() work
+* Be able to remove bad shot pruning
+* Better definition of score values
+* Use a struct for debug parameters
+
+
+
