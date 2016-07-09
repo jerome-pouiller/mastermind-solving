@@ -9,8 +9,6 @@
 
 #include <stdio.h>
 
-#define I(...)  { .d = { __VA_ARGS__ } };
-
 int main(int argc, char **argv) {
     int ret;
 
