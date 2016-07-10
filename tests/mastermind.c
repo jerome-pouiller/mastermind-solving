@@ -171,7 +171,7 @@ int filterShots(shot_t out[], shot_t in[], char op, int score) {
 int checkOne(const shot_t *hint, const shot_t *prop) {
     int i, j;
     int count;
-    int used[NB_PLACES] = { 0 };
+    int used[NB_PLACES] = { };
 
     count = 0;
     for (i = 0; i < NB_PLACES; i++)
@@ -183,13 +183,12 @@ int checkOne(const shot_t *hint, const shot_t *prop) {
         return INT_MAX;
     count = 0;
     for (i = 0; i < NB_PLACES; i++)
-        if (!(used[i] & 1))
-            for (j = 0; j < NB_PLACES; j++)
-                if (!(used[j] & 2) && prop->d[i] == hint->d[j]) {
-                    //used[i] |= 1;
-                    used[j] |= 2;
-                    count++;
-                }
+        for (j = 0; j < NB_PLACES; j++)
+            if (!(used[i] & 1) && !(used[j] & 2) && prop->d[i] == hint->d[j] && j != i) {
+                used[i] |= 1;
+                used[j] |= 2;
+                count++;
+            }
     if (count != hint->d[IDX_HINT_COLOR])
         return INT_MAX;
 
