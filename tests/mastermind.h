@@ -169,6 +169,23 @@ int checkOne(const shot_t *hint, const shot_t *prop);
  */
 int check(shot_t hints[], const shot_t *prop);
 
+/**
+ * Parse content of a filedescriptor containing shots and return it in results.
+ * Filedescriptor have to contains multiple lines. Same rules than parseShot()
+ * applies. The last shot (and only this one) may omit Master answer.
+ *
+ */
+void loadShots(int *fd, shot_t *results, int len);
+
+/**
+ * Convert a line of text in shot_t. Text have to looks like "A A A A 0 0"
+ *
+ * There are a few rules:
+ *    - Multiple blanks are ignored
+ *    - If '#' is encountered, rest of line is ignored
+ *    - Text may omit Master answer
+ */
+void parseShot(const char *data, shot_t *result);
 
 #endif /* MASTERMIND_H */
 
