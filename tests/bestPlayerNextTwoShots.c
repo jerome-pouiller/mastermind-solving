@@ -57,7 +57,10 @@ struct dbg_shot {
     int subs_len;
 };
 
-static const int minMaxDepth = 1;
+// If minMaxDepth > printDepth, algorithm will search deeper but only show
+// printDepth depth.
+static const int minMaxDepth = 2;
+static int printDepth = 2;
 static int initialDepth = 0;
 static int isMasterSearch = 0;
 
@@ -138,13 +141,22 @@ void dbg_end(shot_t history[], colorlist_t *colors, int depth, shot_t results[],
     struct dbg_shot *local = (struct dbg_shot *) dbg_local;
 
     reccursive_print(local, 0);
+    reccursive_free(local);
 }
 
 void *dbg_inMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPossibleShots_t *results, void *priv, void *dbg_parent, int sibling) {
     struct dbg_shot *parent = ((struct dbg_shot *) dbg_parent) + sibling;
-    parent->subs_len = getNumShots(results->d, 0, 0);
-    parent->subs = (struct dbg_shot *) zalloc(sizeof(struct dbg_shot) * parent->subs_len);
 
+    if (!dbg_parent)
+        return NULL;
+    if (initialDepth - minMaxDepth < printDepth) {
+        parent->subs_len = getNumShots(results->d, 0, 0);
+        parent->subs = (struct dbg_shot *) zalloc(sizeof(struct dbg_shot) * parent->subs_len);
+    } else {
+        // Useless since already initialized with 0s
+        //parent->subs_len = 0;
+        //parent->subs = NULL;
+    }
     return parent->subs;
 }
 
@@ -153,6 +165,8 @@ void dbg_outMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPo
     int j = 0;
     int i;
 
+    if (!dbg_parent)
+        return ;
     if (min == INT_MAX) {
         reccursive_free(parent->subs);
         parent->subs = NULL;
@@ -175,8 +189,17 @@ void dbg_outMin(shot_t history[], colorlist_t *colors, int minMaxDepth, playerPo
 
 void *dbg_inMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, void *priv, void *dbg_parent, int sibling) {
     struct dbg_shot *parent = ((struct dbg_shot *) dbg_parent) + sibling;
-    parent->subs_len = getNumShots(results->d, 0, 0);
-    parent->subs = (struct dbg_shot *) zalloc(sizeof(struct dbg_shot) * parent->subs_len);
+
+    if (!dbg_parent)
+        return NULL;
+    if (initialDepth - minMaxDepth < printDepth) {
+        parent->subs_len = getNumShots(results->d, 0, 0);
+        parent->subs = (struct dbg_shot *) zalloc(sizeof(struct dbg_shot) * parent->subs_len);
+    } else {
+        // Useless since already initialized with 0s
+        //parent->subs_len = 0;
+        //parent->subs = NULL;
+    }
 
     return parent->subs;
 }
@@ -185,6 +208,8 @@ void dbg_outMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPo
     struct dbg_shot *parent = ((struct dbg_shot *) dbg_parent) + sibling;
     int i;
 
+    if (!dbg_parent)
+        return ;
     for (i = 0; i < parent->subs_len; i++) {
         memcpy(&parent->subs[i].s, &results->d[i], sizeof(parent->subs[0].s));
     }
