@@ -95,17 +95,25 @@ void dbg_prShot(const shot_t shot) {
 
 void reccursive_print(struct dbg_shot *in, int depth) {
     int i, j;
+    int full_print = 0;
 
     if (!in || !in->subs_len)
         return;
-    
-    if (in->subs[0].subs_len) {
+
+    for (i = 0; i < in->subs_len; i++)
+        if (in->subs[i].subs_len)
+            full_print = 1;
+    if (full_print) {
         for (i = 0; i < in->subs_len; i++) {
-            for (j = 0; j < depth; j++)
-                printf("    ");
-            dbg_prShot(in->subs[i].s);
-            printf(" (score: %d)\n", in->subs[i].s.d[IDX_SCORE]);
-            reccursive_print(in->subs + i, depth + 1);
+            if (in->subs[i].s.d[IDX_SCORE] != INT_MAX) {
+                for (j = 0; j < depth; j++)
+                    printf("    ");
+                dbg_prShot(in->subs[i].s);
+                printf(" (score: %d)\n", in->subs[i].s.d[IDX_SCORE]);
+                reccursive_print(in->subs + i, depth + 1);
+            } else {
+                assert(!in->subs[i].subs_len);
+            }
         }
     } else {
         for (j = 0; j < depth; j++)
