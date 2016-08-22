@@ -57,7 +57,6 @@ struct dbg_shot {
     int subs_len;
 };
 
-static const int minMaxDepth = 1;
 static int initialDepth = 0;
 static int isMasterSearch = 0;
 
@@ -201,6 +200,7 @@ debug_t debugPrint = {
 };
 
 int main(int argc, char **argv) {
+    static const int minMaxDepth = 1;
     playerPossibleShots_t results;
     shot_t history[] = {
         // S(A, A, B, C, -1, -1),
