@@ -13,6 +13,7 @@
 #include <limits.h>
 
 //#define DEBUG
+// #define EXTRA_PRUNE
 
 static int getHistoryLen(shot_t shots[]) {
     int i;
@@ -283,16 +284,18 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
         results->d[i].d[IDX_SCORE] = check(history, results->d + i);
+#ifdef EXTRA_PRUNE
     // We hypothesize it is useless to play a shot we are sure to be wrong. So
     // we early prune these cases. However, you may argue this shot could give
-    // some usefull information. If you don't want to prune them, comment next line
-    // FIXME: Commenting this line seems not to be sufficient
-#if 1
+    // some usefull information.
     filterShots(results->d, results->d, '>', INT_MAX - 1);
+    num_poss = computeSymetries(results->d, colors);
+#else
+    computeSymetries(results->d, colors);
+    num_poss = getNumRealShots(results->d, '>', INT_MAX - 1);
 #endif
     if (dbg && dbg->inMin)
         dbg_local = dbg->inMin(history, colors, minMaxDepth, results, dbg->priv, dbg_parent, sibling);
-    num_poss = computeSymetries(results->d, colors);
     if (num_poss == 0) {
         min = INT_MAX; // Throw an assert?
     } else if (!minMaxDepth || num_poss == 1) {
@@ -304,24 +307,22 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
         history_len = getHistoryLen(history);
         history[history_len + 1].d[0] = 0;
         for (i = 0; results->d[i].d[0]; i++) {
-            if (results->d[i].d[IDX_SCORE] != INT_MAX) {
-                colorlist_t colors_local;
-                masterPossibleShots_t local = { };
-                memcpy(history + history_len, results->d + i, sizeof(shot_t));
-                memcpy(&colors_local, colors, sizeof(colors_local));
-                for (j = 0; results->d[i].d[j] && j < NB_PLACES; j++) {
-                    for (k = 0; colors_local.d[k] && results->d[i].d[j] != colors_local.d[k]; k++)
-                        ;
-                    if (!colors_local.d[k]) {
-                        colors_local.d[k] = results->d[i].d[j];
-                        colors_local.d[k + 1] = 0;
-                    }
+            colorlist_t colors_local;
+            masterPossibleShots_t local = { };
+            memcpy(history + history_len, results->d + i, sizeof(shot_t));
+            memcpy(&colors_local, colors, sizeof(colors_local));
+            for (j = 0; results->d[i].d[j] && j < NB_PLACES; j++) {
+                for (k = 0; colors_local.d[k] && results->d[i].d[j] != colors_local.d[k]; k++)
+                    ;
+                if (!colors_local.d[k]) {
+                    colors_local.d[k] = results->d[i].d[j];
+                    colors_local.d[k + 1] = 0;
                 }
-                results->d[i].d[IDX_SCORE] = getMax(history, &colors_local, minMaxDepth - 1, &local, dbg, dbg_local, i);
-                assert(results->d[i].d[IDX_SCORE] > 0);
-                if (results->d[i].d[IDX_SCORE] < min)
-                    min = results->d[i].d[IDX_SCORE];
             }
+            results->d[i].d[IDX_SCORE] = getMax(history, &colors_local, minMaxDepth - 1, &local, dbg, dbg_local, i);
+            assert(results->d[i].d[IDX_SCORE] > 0);
+            if (results->d[i].d[IDX_SCORE] < min)
+                min = results->d[i].d[IDX_SCORE];
         }
         history[history_len].d[0] = 0;
     }
