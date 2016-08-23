@@ -297,8 +297,15 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
     if (dbg && dbg->inMin)
         dbg_local = dbg->inMin(history, colors, minMaxDepth, results, dbg->priv, dbg_parent, sibling);
     if (num_poss == 0) {
-        min = INT_MAX; // Throw an assert?
-    } else if (!minMaxDepth || num_poss == 1) {
+        min = INT_MAX; // Master provide us an impossible game
+    } else if (num_poss == 1) {
+        for (i = 0; results->d[i].d[0]; i++)
+            if (results->d[i].d[IDX_SCORE])
+                results->d[i].d[IDX_SCORE] = -minMaxDepth - 1;
+            else
+                results->d[i].d[IDX_SCORE] = -minMaxDepth - 2;
+        min = -minMaxDepth - 2;
+    } else if (!minMaxDepth) {
         for (i = 0; results->d[i].d[0]; i++)
             results->d[i].d[IDX_SCORE] = num_poss;
         min = num_poss;
@@ -320,7 +327,9 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
                 }
             }
             results->d[i].d[IDX_SCORE] = getMax(history, &colors_local, minMaxDepth - 1, &local, dbg, dbg_local, i);
-            assert(results->d[i].d[IDX_SCORE] > 0);
+            assert(results->d[i].d[IDX_SCORE] != INT_MIN);
+            assert(results->d[i].d[IDX_SCORE] != 0);
+            assert(results->d[i].d[IDX_SCORE] != 1);
             if (results->d[i].d[IDX_SCORE] < min)
                 min = results->d[i].d[IDX_SCORE];
         }
@@ -332,7 +341,7 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
 }
 
 static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, masterPossibleShots_t *results, const debug_t *dbg, void *dbg_parent, int sibling) {
-    int max = 0;
+    int max = INT_MIN;
     int history_len;
     int i;
     void *dbg_local = NULL;
@@ -357,6 +366,7 @@ static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, master
     }
     if (dbg && dbg->outMax)
         dbg->outMax(history, colors, minMaxDepth, results, max, dbg->priv, dbg_parent, dbg_local, sibling);
+    assert(max != INT_MIN);
     return max;
 }
 
