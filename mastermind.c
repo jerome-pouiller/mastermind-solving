@@ -13,7 +13,7 @@
 #include <limits.h>
 
 //#define DEBUG
-#define EXTRA_PRUNE 7
+#define EXTRA_PRUNE 6
 
 static int getHistoryLen(shot_t shots[]) {
     int i;
