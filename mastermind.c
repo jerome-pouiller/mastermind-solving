@@ -13,7 +13,7 @@
 #include <limits.h>
 
 //#define DEBUG
-// #define EXTRA_PRUNE
+#define EXTRA_PRUNE 7
 
 static int getHistoryLen(shot_t shots[]) {
     int i;
@@ -281,38 +281,51 @@ static int getMin(shot_t history[], colorlist_t *colors, int minMaxDepth, player
     int min;
     void *dbg_local = NULL;
 
+    history_len = getHistoryLen(history);
     getPossiblePlayerShots(colors, results);
     for (i = 0; results->d[i].d[0]; i++)
         results->d[i].d[IDX_SCORE] = check(history, results->d + i);
-#ifdef EXTRA_PRUNE
-    // We hypothesize it is useless to play a shot we are sure to be wrong. So
-    // we early prune these cases. However, you may argue this shot could give
-    // some usefull information.
-    filterShots(results->d, results->d, '>', INT_MAX - 1);
-    num_poss = computeSymetries(results->d, colors);
-#else
     computeSymetries(results->d, colors);
     num_poss = getNumRealShots(results->d, '>', INT_MAX - 1);
-#endif
+    assert(!history_len || history[history_len - 1].d[IDX_SCORE] <= 0 || num_poss <= history[history_len - 1].d[IDX_SCORE]);
+
+    // Normally, even if a shot is known to be wrong, we keep since it may
+    // provide us usefull informations. However in last shots (when number of
+    // possible shots < 5), it is probably more efficient to prune shots known
+    // to be wrong.
+    if (num_poss < EXTRA_PRUNE)
+        filterShots(results->d, results->d, '>', INT_MAX - 1);
+
     if (dbg && dbg->inMin)
         dbg_local = dbg->inMin(history, colors, minMaxDepth, results, dbg->priv, dbg_parent, sibling);
-    if (num_poss == 0) {
-        min = INT_MAX; // Master provide us an impossible game
-    } else if (num_poss == 1) {
+    if (num_poss == 0) { // Master provide us an impossible game
+        min = INT_MAX;
+    } else if (num_poss == 1) { // We found solution
         for (i = 0; results->d[i].d[0]; i++)
             if (results->d[i].d[IDX_SCORE])
                 results->d[i].d[IDX_SCORE] = -minMaxDepth - 1;
             else
                 results->d[i].d[IDX_SCORE] = -minMaxDepth - 2;
         min = -minMaxDepth - 2;
-    } else if (!minMaxDepth) {
+    } else if (history_len && num_poss == history[history_len - 1].d[IDX_SCORE]) {
+
+#ifdef DEBUG
+        // Should be same than parent score but it is difficult to do. However,
+        // we know this information will never been used in normal cases. Only
+        // dbg->outMin or hacker may use it.
+        for (i = 0; results->d[i].d[0]; i++)
+            results->d[i].d[IDX_SCORE] = num_poss;
+#endif
+        min = num_poss;
+    } else if (!minMaxDepth) { // Do not go deeper
         for (i = 0; results->d[i].d[0]; i++)
             results->d[i].d[IDX_SCORE] = num_poss;
         min = num_poss;
     } else {
         min = INT_MAX;
-        history_len = getHistoryLen(history);
         history[history_len + 1].d[0] = 0;
+        for (i = 0; results->d[i].d[0]; i++)
+            results->d[i].d[IDX_SCORE] = num_poss; // This is a temporary score
         for (i = 0; results->d[i].d[0]; i++) {
             colorlist_t colors_local;
             masterPossibleShots_t local = { };
@@ -361,6 +374,8 @@ static int getMax(shot_t history[], colorlist_t *colors, int minMaxDepth, master
         playerPossibleShots_t local = { };
         memcpy(history + history_len, results->d + i, sizeof(shot_t));
         results->d[i].d[IDX_SCORE] = getMin(history, colors, minMaxDepth, &local, dbg, dbg_local, i);
+        assert(results->d[i].d[IDX_SCORE] != 0);
+        assert(results->d[i].d[IDX_SCORE] != 1);
         if (results->d[i].d[IDX_SCORE] > max && results->d[i].d[IDX_SCORE] < INT_MAX)
             max = results->d[i].d[IDX_SCORE];
     }
