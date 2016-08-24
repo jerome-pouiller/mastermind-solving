@@ -10,7 +10,7 @@
 #include <limits.h>
 #include "mastermind.h"
 
-static const int minMaxDepth = 1;
+static const int minMaxDepth = 10;
 static int initialDepth = 0;
 static int isMasterSearch = 0;
 
@@ -96,7 +96,9 @@ debug_t debugPrint = {
 int main(int argc, char **argv) {
     playerPossibleShots_t results;
     shot_t history[] = {
-        S(A, A, B, C, -1, -1),
+        //S(D, C, B, A, 0, 4),
+        S(A, B, D, C, 2, 2),
+        //S(A, B, C, D, 4, 0),
         S()
     };
 
