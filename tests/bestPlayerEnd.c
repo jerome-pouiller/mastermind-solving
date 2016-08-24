@@ -8,13 +8,15 @@
 #include <stdio.h>
 #include "mastermind.h"
 
-static const int minMaxDepth = 1;
+static const int minMaxDepth = 5;
 
 int main(int argc, char **argv) {
     int ret;
     playerPossibleShots_t results;
     shot_t history[] = {
-        S(A, A, A, B, 0, 4),
+        //S(D, C, B, A, 0, 4),
+        S(A, B, D, C, 2, 2),
+        //S(A, B, C, D, 4, 0),
         S()
     };
 

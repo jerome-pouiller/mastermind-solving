@@ -60,7 +60,7 @@ struct dbg_shot {
 // If minMaxDepth > printDepth, algorithm will search deeper but only show
 // printDepth depth.
 static const int minMaxDepth = 2;
-static int printDepth = 2;
+static int printDepth = 1;
 static int initialDepth = 0;
 static int isMasterSearch = 0;
 
@@ -228,7 +228,9 @@ debug_t debugPrint = {
 int main(int argc, char **argv) {
     playerPossibleShots_t results;
     shot_t history[] = {
-        // S(A, A, B, C, -1, -1),
+         S('0', '0', '1', '1', -1, -1),
+        //S(B, A, D, C, 0, 4),
+        //S(A, B, D, C, 2, 2),
         S()
     };
 
