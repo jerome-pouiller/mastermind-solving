@@ -4,7 +4,7 @@
 # Main authors:
 #     - Jérôme Pouiller <jezz@sysmic.org>
 #
-CFLAGS += -Wall -I .
+CFLAGS += -Wall -I . -g3 -O3 -DNDEBUG
 PREFIX = /usr/local
 
 all: tests/computeSymetry tests/debugPrint tests/initAndPrint \
