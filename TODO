@@ -1,10 +1,22 @@
-
-* There is a bug in bestPlayerEnd
-* Convert to OpenMP (only first loop)
-* Make bestPlayerNextTwoShots() work
-* Be able to remove bad shot pruning
-* Better definition of score values
-* Use a struct for debug parameters
-
+1. Algorithm is fast enough at begin, but very slow for last shots (see
+   bestPlayerEnd). Currently EXTRA_PRUNE allow to speed up last shots. However,
+   it may produce wrong results. A possible optimization would be to pass best
+   score already found to getMin sub-calls. This parameter will ignored if > 0.
+   Howver, if it is < 0 and minMaxDepth < -bestScore, do not go deeper in
+   algorithm since we alread find a better path somewhere else.
+2. There is a bug in bestPlayerNextTwoShots with printDepth = 3 and minMaxDepth
+   = 1, but it seems to be a display error.
+3. First call to getMin/getMax may display a progress bar
+4. First call to getMin should use OpenMP
+5. IDX_SCORE is not well named. In fact the only function that wait for Score is
+   getBestShot() (and debug functions). In many other place, other kind of
+   information is stored in IDX_SCORE.
+6. In the old days, we filter results before to call computeSymetries. So it did
+   computing only on valid shots. Now it compute it on all shots even if
+   unecessary. In add, we cache this result, while finally, it is never used.
+   We should remove computeSymetries() and include it in getNumRealShots() (we
+   may keep cache if DEBUG is defined).  We may get 5 to 10% of improvements.
+7. Implement and and use parseShot() and loadShots()
+8. Use a struct for debug parameters
 
 
