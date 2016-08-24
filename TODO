@@ -1,6 +1,7 @@
 1. Algorithm is fast enough at begin, but very slow for last shots (see
-   bestPlayerEnd). Currently EXTRA_PRUNE allow to speed up last shots. However,
-   it may produce wrong results. A possible optimization would be to pass best
+   bestPlayerEnd). Currently EXTRA_PRUNE allow to speed up last shots. It divide
+   by 1000 time for last shots. However, results it produce are not optimal (we
+   can even say they are wrong). A possible optimization would be to pass best
    score already found to getMin sub-calls. This parameter will ignored if > 0.
    Howver, if it is < 0 and minMaxDepth < -bestScore, do not go deeper in
    algorithm since we alread find a better path somewhere else.
