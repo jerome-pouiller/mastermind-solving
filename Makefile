@@ -9,7 +9,7 @@ PREFIX = /usr/local
 
 all: tests/computeSymetry tests/debugPrint tests/initAndPrint \
      tests/bestPlayerNextTwoShots tests/bestMasterShot tests/bestPlayerShot \
-     tests/bestPlayerEnd tests/paramMasterLevel libmastermind.so
+     tests/bestPlayerEnd tests/paramMasterLevel tests/obvious libmastermind.so
 
 tests/paramMasterLevel: tests/paramMasterLevel.o libmastermind.a
 tests/bestMasterShot: tests/bestMasterShot.o libmastermind.a
@@ -19,6 +19,7 @@ tests/bestPlayerEnd: tests/bestPlayerEnd.o libmastermind.a
 tests/computeSymetry: tests/computeSymetry.o libmastermind.a
 tests/debugPrint: tests/debugPrint.o libmastermind.a
 tests/initAndPrint: tests/initAndPrint.o libmastermind.a
+tests/obvious: tests/obvious.o libmastermind.a
 
 libmastermind.a: mastermind.o
 	$(AR) $(ARFLAGS) $@ $<
@@ -36,6 +37,7 @@ libmastermind.so: mastermind_shared.o
 -include tests/computeSymetry.d
 -include tests/mastermind.d
 -include tests/mastermind_shared.d
+-include tests/obvious.d
 
 %_shared.o: %.c
 	$(COMPILE.c) -MMD -fPIC $(OUTPUT_OPTION) $<
@@ -49,7 +51,8 @@ clean:
 distclean: clean
 	$(RM) tests/initAndPrint tests/debugPrint tests/computeSymetry \
 	      tests/bestPlayerEnd tests/bestPlayerShot tests/bestPlayerNextTwoShots \
-	      tests/bestMasterShot tests/paramMasterLevel libmastermind.so libmastermind.a
+	      tests/bestMasterShot tests/paramMasterLevel tests/obvious \
+	      libmastermind.so libmastermind.a
 
 install:
 	install -m 755 -d $(DESTDIR)$(PREFIX)/lib
