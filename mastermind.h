@@ -8,6 +8,19 @@
 #ifndef MASTERMIND_H
 # define MASTERMIND_H
 
+/*
+ * About symmetries:
+ * It is possible to use symmetries to optimize Mastermind solving. In this
+ * algorithm, value fron 'A' to 'Z' represent a true value, while values from
+ * '0' to '9' mean a 'joker'. They mean any color that was not yet played. Some
+ * function need to know all colors that are already played in order to
+ * corectly compute symmetries. See colorlist_t and getUsedColors(). In same
+ * order, one entry in results may represent multiple real entries. There a
+ * place to stroe this information in shot_t (IDX_NUM_SYM). Some function need
+ * them but this information is not refreshed automatically. Call
+ * computeSymetries() for that.
+ */
+
 // Number of color in game
 #define NB_COLORS        6
 
@@ -35,7 +48,7 @@
 #define IDX_SCORE        (NB_PLACES + NB_HINTS + 1)
 
 // Number of possible shots for player (used to store results)
-#define NB_POSS_PLAYER   (6 * 6 * 6 * 6) // 6 ** 4
+#define NB_POSS_PLAYER   (6 * 6 * 6 * 6) // NB_COLORS ** NB_PLACES
 
 // Number of possible shots for master (used to store results)
 // Note: if (NB_PLACES - 1) are correctly placed, it is not possible to have 1 wrong placed
