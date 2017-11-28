@@ -21,7 +21,7 @@
 
 // Number of extra places in shot_t
 #define NB_EXTRA         2
-// Index number of symetry in this shot (should be 1 if there is no jocker).
+// Index number of symetry in this shot (should be 1 if there is no joker).
 //  0 means uninitialized
 #define IDX_NUM_SYM      (NB_PLACES + NB_HINTS + 0)
 // Index of score (= number of possibilities for player/master after this shot):
@@ -84,14 +84,14 @@ typedef struct debug {
 #define F (COLOR_OFFSET + 5)
 #define G (COLOR_OFFSET + 6)
 
-#define JOCKER_OFFSET '0'
-#define J0 (JOCKER_OFFSET + 0)
-#define J1 (JOCKER_OFFSET + 1)
-#define J2 (JOCKER_OFFSET + 2)
-#define J3 (JOCKER_OFFSET + 3)
-#define J4 (JOCKER_OFFSET + 4)
-#define J5 (JOCKER_OFFSET + 5)
-#define J6 (JOCKER_OFFSET + 6)
+#define JOKER_OFFSET '0'
+#define J0 (JOKER_OFFSET + 0)
+#define J1 (JOKER_OFFSET + 1)
+#define J2 (JOKER_OFFSET + 2)
+#define J3 (JOKER_OFFSET + 3)
+#define J4 (JOKER_OFFSET + 4)
+#define J5 (JOKER_OFFSET + 5)
+#define J6 (JOKER_OFFSET + 6)
 
 /*
  * Get list of used colors in shot list
@@ -99,10 +99,10 @@ typedef struct debug {
 int getUsedColors(shot_t history[], colorlist_t *colors);
 
 /*
- * Get list of possible shots for player with given colorlist. Use jocker for
+ * Get list of possible shots for player with given colorlist. Use joker for
  * not yet used colors.
  * 'colors' is list of already used colors (if # of already used colors ==
- * NB_COLORS, no jocker are used).
+ * NB_COLORS, no joker are used).
  *
  */
 int getPossiblePlayerShots(colorlist_t *colors, playerPossibleShots_t *results);
@@ -130,13 +130,13 @@ int getPossibleGameShots(shot_t history[], shot_t results[]);
 int getBestShot(shot_t history[], int minMaxDepth, shot_t results[], const debug_t *dbg);
 
 /*
- * From a shot list, return number of entries (without taking account jockers)
+ * From a shot list, return number of entries (without taking account jokers)
  * with a score better or equal to score
  */
 int getNumShots(shot_t shots[], char op, int score);
 
 /*
- * From a shot list, return real (taking account jockers) number of shots with a
+ * From a shot list, return real (taking account jokers) number of shots with a
  * score better or equal to score. Make sure symtery information is available in
  * shots (by calling computeSymetries() before, for example).
  */

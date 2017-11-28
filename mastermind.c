@@ -83,14 +83,14 @@ int getNumRealShots(shot_t shots[], char op, int score) {
     return num;
 }
 
-// Given number of unknown colors and last jocker used, compute symetries of a
+// Given number of unknown colors and last joker used, compute symetries of a
 // shot.
-static int _computeSymetries(shot_t *shot, char lst_jocker, int nb_unknown) {
+static int _computeSymetries(shot_t *shot, char lst_joker, int nb_unknown) {
     int i;
     int cnt = 1;
     for (i = 0; i < NB_PLACES; i++) {
-        if (shot->d[i] > lst_jocker && shot->d[i] < JOCKER_OFFSET + NB_COLORS) {
-            lst_jocker = shot->d[i];
+        if (shot->d[i] > lst_joker && shot->d[i] < JOKER_OFFSET + NB_COLORS) {
+            lst_joker = shot->d[i];
             cnt *= nb_unknown;
             nb_unknown--;
         }
@@ -103,14 +103,14 @@ int computeSymetries(shot_t shots[], colorlist_t *colors) {
     int total = 0;
     int i;
     int nb_unknown;
-    char lst_jocker = JOCKER_OFFSET - 1;
+    char lst_joker = JOKER_OFFSET - 1;
 
     for (i = 0; colors->d[i]; i++)
-        if (colors->d[i] > lst_jocker && colors->d[i] < JOCKER_OFFSET + NB_COLORS)
-            lst_jocker = colors->d[i];
+        if (colors->d[i] > lst_joker && colors->d[i] < JOKER_OFFSET + NB_COLORS)
+            lst_joker = colors->d[i];
     nb_unknown = NB_COLORS - i;
     for (i = 0; shots[i].d[0]; i++) {
-        shots[i].d[IDX_NUM_SYM] = _computeSymetries(shots + i, lst_jocker, nb_unknown);
+        shots[i].d[IDX_NUM_SYM] = _computeSymetries(shots + i, lst_joker, nb_unknown);
         total += shots[i].d[IDX_NUM_SYM];
     }
     return total;
@@ -204,7 +204,7 @@ int check(shot_t hints[], const shot_t *prop) {
 }
 
 static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *pattern, shot_t results[]) {
-    int jocker = JOCKER_OFFSET;
+    int joker = JOKER_OFFSET;
     int pattern_len, colors_len;
     int total = 0;
     int i;
@@ -214,8 +214,8 @@ static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *pattern, shot_t 
     pattern_len = i;
 
     for (i = 0; colors->d[i]; i++) {
-        if (colors->d[i] >= jocker && colors->d[i] < JOCKER_OFFSET + NB_COLORS)
-            jocker = colors->d[i] + 1;
+        if (colors->d[i] >= joker && colors->d[i] < JOKER_OFFSET + NB_COLORS)
+            joker = colors->d[i] + 1;
     }
     colors_len = i;
     colors->d[colors_len] = 0;
@@ -223,7 +223,7 @@ static int _getPossiblePlayerShots(colorlist_t *colors, shot_t *pattern, shot_t 
     for (i = 0; i < colors_len + 1; i++) {
         if (i < NB_COLORS) {
             if (i == colors_len)
-                colors->d[colors_len] = jocker;
+                colors->d[colors_len] = joker;
             pattern->d[pattern_len] = colors->d[i];
             if (pattern_len < NB_PLACES - 1) {
                 total += _getPossiblePlayerShots(colors, pattern, results + total);
