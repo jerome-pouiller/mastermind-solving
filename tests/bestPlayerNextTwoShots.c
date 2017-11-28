@@ -228,9 +228,9 @@ debug_t debugPrint = {
 int main(int argc, char **argv) {
     playerPossibleShots_t results;
     shot_t history[] = {
-         S('0', '0', '1', '1', -1, -1),
-        //S(B, A, D, C, 0, 4),
-        //S(A, B, D, C, 2, 2),
+        S(J0, J0, J1, J1, -1, -1),
+        //S( B,  A,  D,  C,  0,  4),
+        //S( A,  B,  D,  C,  2,  2),
         S()
     };
 

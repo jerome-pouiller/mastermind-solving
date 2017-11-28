@@ -14,10 +14,10 @@ int main(int argc, char **argv) {
 
     shot_t solo = S(A, B, C, D);
     shot_t history[] = {
-        S( A, B, C, D,     0, 3 ),
-        S( A, B, '0', '1', 1, 2 ),
-        S( A, B, C, D,     2, 1,   3, 4 ),
-        S( A, B, C, D,     3, 0, 123, 1 ),
+        S(  A,  B,  C,  D, 0, 3 ),
+        S(  A,  B, J0, J1, 1, 2 ),
+        S(  A,  B,  C,  D, 2, 1,   3, 4 ),
+        S(  A,  B,  C,  D, 3, 0, 123, 1 ),
         S( ),
     };
     masterPossibleShots_t master;

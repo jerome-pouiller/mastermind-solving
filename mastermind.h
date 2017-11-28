@@ -76,7 +76,6 @@ typedef struct debug {
 
 // Helpers to define histories
 #define COLOR_OFFSET 'A'
-#define JOCKER_OFFSET '0'
 #define A (COLOR_OFFSET + 0)
 #define B (COLOR_OFFSET + 1)
 #define C (COLOR_OFFSET + 2)
@@ -84,6 +83,15 @@ typedef struct debug {
 #define E (COLOR_OFFSET + 4)
 #define F (COLOR_OFFSET + 5)
 #define G (COLOR_OFFSET + 6)
+
+#define JOCKER_OFFSET '0'
+#define J0 (JOCKER_OFFSET + 0)
+#define J1 (JOCKER_OFFSET + 1)
+#define J2 (JOCKER_OFFSET + 2)
+#define J3 (JOCKER_OFFSET + 3)
+#define J4 (JOCKER_OFFSET + 4)
+#define J5 (JOCKER_OFFSET + 5)
+#define J6 (JOCKER_OFFSET + 6)
 
 /*
  * Get list of used colors in shot list

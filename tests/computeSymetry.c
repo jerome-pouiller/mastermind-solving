@@ -10,14 +10,14 @@
 
 int main(int argc, char **argv) {
     shot_t history[] = {
-        S(A, A, A, A, 0, 0),
-        S('0', '0', '0', '0', 0, 0),
+        S( A,  A,  A,  A, 0, 0),
+        S(J0, J0, J0, J0, 0, 0),
         S()
     };
     shot_t propositons[] = {
-        S(A, A, A, A,   0, 0), // symetry = 1
-        S(A, A, A, '0', 0, 0), // symetry = 1
-        S(A, A, A, '1', 0, 0), // symetry = 4
+        S(A, A, A,  A, 0, 0), // symetry = 1
+        S(A, A, A, J0, 0, 0), // symetry = 1
+        S(A, A, A, J1, 0, 0), // symetry = 4
         S()
     };
     colorlist_t colors;
